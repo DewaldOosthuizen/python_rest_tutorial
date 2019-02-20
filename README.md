@@ -1,4 +1,4 @@
-# article_project1
+# python_rest_tutorial
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
 
