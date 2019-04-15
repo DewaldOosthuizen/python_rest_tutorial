@@ -2,6 +2,9 @@
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
 
+Here is an article you can follow to create this project from the beginning:
+https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb
+
 Inside the root project you can run
 
 ```
