@@ -19,3 +19,5 @@ sudo docker-compose up
 
 Once the container is running, you can access it by opening your browser and typing in localhost:5000/hello. This should 
 display a "Hello World!" message.
+
+There are also other endpoints to test with, and can be found in the article mentioned at the top.
