@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
+
 # python_rest_tutorial
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
