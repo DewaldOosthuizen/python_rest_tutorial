@@ -26,7 +26,7 @@ There are also other endpoints to test with, and can be found in the article men
 
 ## Using postman
 
-When using postman to test your rest endpoints, be sure to add codntent-type: application/json to your headers.
+When using postman to test your rest endpoints, be sure to add content-type: application/json to your headers.
 
 If you don't want to specify content type in the header then you can use
 request.get_json(force=True) inside your endpoint when fetching the data from the request
