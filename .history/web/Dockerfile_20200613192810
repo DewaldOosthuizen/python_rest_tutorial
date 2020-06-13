@@ -1,5 +1,5 @@
 # Pull python 3 image
-FROM python:3
+FROM python:3.7
 # Create a work dir
 WORKDIR /usr/src/app
 # copy requirements.txt into workdir created above
@@ -8,7 +8,7 @@ COPY requirements.txt ./
 RUN python3 -m pip install --user --no-cache-dir -r requirements.txt
 # Copy entire project into workdir
 COPY . .
-# Run our app without output
-CMD ["python", "app.py"] 
-
+# Run our app
+# CMD ["python", "app.py"]
+CMD ["python","-u","main.py"]
 

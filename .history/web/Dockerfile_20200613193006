@@ -9,6 +9,8 @@ RUN python3 -m pip install --user --no-cache-dir -r requirements.txt
 # Copy entire project into workdir
 COPY . .
 # Run our app without output
-CMD ["python", "app.py"] 
+# CMD ["python", "app.py"]
+# Run our app with output
+CMD ["python","-u","main.py"] 
 
 

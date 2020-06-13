@@ -3,8 +3,8 @@ from flask_restful import Api, Resource
 from pymongo import MongoClient
 import bcrypt
 import functools
-# import json
-# print = functools.partial(print, flush=True)
+import json
+print = functools.partial(print, flush=True)
 
 app = Flask(__name__)
 api = Api(app)
@@ -59,7 +59,7 @@ class Hello(Resource):
 class Register(Resource):
     def post(self):
         # Get posted data from request
-        data = request.get_json()
+        data = request.get_json(force=True)
 
         username = data["username"]
         password = data["password"]
