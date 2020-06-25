@@ -1,3 +1,6 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
+[![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
+
 # python_rest_tutorial
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
@@ -33,7 +36,3 @@ request.get_json(force=True) inside your endpoint when fetching the data from th
 to force the data to be read as JSON.
 
 For reference have a look at <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1>
-
-## Donate
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
