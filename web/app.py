@@ -1,5 +1,5 @@
-import bcrypt
 import functools
+import bcrypt
 
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
@@ -12,8 +12,8 @@ api = Api(app)
 client = MongoClient("mongodb://my_db:27017")
 db = client.projectDB
 users = db["Users"]
-invalid_user_json = { "status": 301, "msg": "Invalid Username" }
-invalid_password_json = { "status": 302, "msg": "Invalid password" }
+invalid_user_json = {"status": 301, "msg": "Invalid Username"}
+invalid_password_json = {"status": 302, "msg": "Invalid password"}
 
 """
 HELPER FUNCTIONS
@@ -21,7 +21,7 @@ HELPER FUNCTIONS
 
 
 def user_exist(username):
-    return users.find({"Username": username}).count() > 0;
+    return users.find({"Username": username}).count() > 0
 
 
 def verify_user(username, password):
@@ -32,7 +32,7 @@ def verify_user(username, password):
         "Username": username
     })[0]["Password"]
 
-    return bcrypt.checkpw(password.encode('utf8'), user_hashed_pw);
+    return bcrypt.checkpw(password.encode('utf8'), user_hashed_pw)
 
 
 def get_user_messages(username):
