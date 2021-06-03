@@ -1,7 +1,9 @@
+# python_rest_tutorial
+
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
 [![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
-
-# python_rest_tutorial
+![AppScore](https://www.code-inspector.com/project/23336/score/svg)
+![AppScore](https://www.code-inspector.com/project/23336/status/svg)
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
 
