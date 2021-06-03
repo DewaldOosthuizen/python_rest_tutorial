@@ -1,11 +1,10 @@
 version: "3"
-
-services: 
-  web: 
+services:
+  web:
     build: "./web"
-    ports: 
+    ports:
       - "5000:5000"
-    links: 
+    links:
       - my_db
   my_db:
     build: "./db"
