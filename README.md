@@ -2,8 +2,7 @@
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
 [![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
-[![AppScore](https://www.code-inspector.com/project/23336/score/svg)](https://frontend.code-inspector.com/public/project/23336/python_rest_tutorial/dashboard)
-[![CodeGrade](https://www.code-inspector.com/project/23336/status/svg)](https://frontend.code-inspector.com/public/project/23336/python_rest_tutorial/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/53014a434fb340f2afde9853e2314a8a)](https://www.codacy.com/gh/DewaldOosthuizen/python_rest_tutorial/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DewaldOosthuizen/python_rest_tutorial&amp;utm_campaign=Badge_Grade)
 
 Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
 
