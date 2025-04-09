@@ -1,15 +1,15 @@
 # python_rest_tutorial
 
-This is a comprehensive guide and implementation to help developers learn how to create RESTful APIs using Python. It demonstrates best practices for building scalable and efficient APIs, leveraging Python's capabilities alongside Docker for containerization. The repository serves as an educational resource for both beginners and experienced developers looking to refine their skills in REST API development.
+This is a comprehensive guide and implementation to help developers learn how to create RESTful APIs using Python, Flask, Docker and MongoDB. It demonstrates best practices for 
+building scalable and efficient APIs, leveraging Python's capabilities alongside Docker for containerization. The repository serves as an educational 
+resource for both beginners and experienced developers looking to refine their skills in REST API development.
+
+Here is an article you can follow to create this project from the beginning:
+<https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb>
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
 [![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/53014a434fb340f2afde9853e2314a8a)](https://www.codacy.com/gh/DewaldOosthuizen/python_rest_tutorial/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DewaldOosthuizen/python_rest_tutorial&amp;utm_campaign=Badge_Grade)
-
-Example project to show how to to build and design RESTful web services using Python, Flask, Docker and MongoDB.
-
-Here is an article you can follow to create this project from the beginning:
-<https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb>
 
 ## Docker and docker-compose
 
