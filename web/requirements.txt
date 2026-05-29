@@ -1,4 +1,6 @@
-Flask
-flask_restful
+Flask==1.0.2
+flask-restful
 pymongo
 bcrypt
+# dev / test
+pytest>=7.0

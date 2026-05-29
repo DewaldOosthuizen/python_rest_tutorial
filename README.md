@@ -39,3 +39,11 @@ request.get_json(force=True) inside your endpoint when fetching the data from th
 to force the data to be read as JSON.
 
 For reference have a look at <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1>
+
+## Running the tests
+
+```bash
+cd web
+pip install -r requirements.txt
+pytest
+```
