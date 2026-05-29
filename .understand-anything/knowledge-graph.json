@@ -1,0 +1,425 @@
+{
+  "nodes": [
+    {
+      "id": "config:db/Dockerfile",
+      "type": "config",
+      "name": "Dockerfile",
+      "filePath": "db/Dockerfile",
+      "summary": "Empty Dockerfile for the MongoDB database service container. No instructions are defined; the docker-compose file references it as the db build context.",
+      "tags": [
+        "docker",
+        "database",
+        "mongodb",
+        "empty"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "config:web/Dockerfile",
+      "type": "config",
+      "name": "Dockerfile",
+      "filePath": "web/Dockerfile",
+      "summary": "Dockerfile for the Flask web service; pulls a Python 3 base image, installs dependencies from requirements.txt, copies the project, and runs app.py as the container entrypoint.",
+      "tags": [
+        "docker",
+        "flask",
+        "python",
+        "web"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "document:LICENSE.md",
+      "type": "document",
+      "name": "LICENSE.md",
+      "filePath": "LICENSE.md",
+      "summary": "MIT License for the python_rest_tutorial project, copyright 2019 Dewald Oosthuizen. Grants broad permissions to use, copy, modify, and distribute the software.",
+      "tags": [
+        "license",
+        "mit",
+        "legal"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Project overview and usage guide for python_rest_tutorial, a tutorial demonstrating RESTful APIs with Python, Flask, Docker, and MongoDB. Includes build/run instructions and Postman testing tips.",
+      "tags": [
+        "documentation",
+        "flask",
+        "rest",
+        "docker",
+        "mongodb",
+        "tutorial"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "config:docker-compose.yml",
+      "type": "config",
+      "name": "docker-compose.yml",
+      "filePath": "docker-compose.yml",
+      "summary": "Docker Compose v3 configuration defining two services: the Flask web service (built from ./web, exposed on port 5000) and the MongoDB database service (built from ./db). The web service links to my_db.",
+      "tags": [
+        "docker",
+        "docker-compose",
+        "orchestration",
+        "flask",
+        "mongodb"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "file:web/app.py",
+      "type": "file",
+      "name": "app.py",
+      "filePath": "web/app.py",
+      "summary": "Main Flask application defining a RESTful API with four resource endpoints (Hello, Register, Retrieve, Save) backed by a MongoDB database. Uses bcrypt for password hashing and flask_restful for resource routing.",
+      "tags": [
+        "flask",
+        "rest",
+        "api",
+        "mongodb",
+        "python",
+        "bcrypt"
+      ],
+      "complexity": "moderate",
+      "exports": [
+        "Hello",
+        "Register",
+        "Retrieve",
+        "Save",
+        "user_exist",
+        "verify_user",
+        "get_user_messages"
+      ]
+    },
+    {
+      "id": "class:web/app.py:Hello",
+      "type": "class",
+      "name": "Hello",
+      "filePath": "web/app.py",
+      "summary": "Flask-RESTful Resource class exposing a GET endpoint at /hello that returns a 'Hello World!' message.",
+      "tags": [
+        "flask-restful",
+        "resource",
+        "hello-world"
+      ],
+      "complexity": "simple",
+      "exports": [
+        "get"
+      ]
+    },
+    {
+      "id": "class:web/app.py:Register",
+      "type": "class",
+      "name": "Register",
+      "filePath": "web/app.py",
+      "summary": "Flask-RESTful Resource class exposing a POST endpoint at /register that creates a new user with a bcrypt-hashed password stored in MongoDB.",
+      "tags": [
+        "flask-restful",
+        "resource",
+        "registration",
+        "bcrypt",
+        "mongodb"
+      ],
+      "complexity": "moderate",
+      "exports": [
+        "post"
+      ]
+    },
+    {
+      "id": "class:web/app.py:Retrieve",
+      "type": "class",
+      "name": "Retrieve",
+      "filePath": "web/app.py",
+      "summary": "Flask-RESTful Resource class exposing a POST endpoint at /retrieve that authenticates a user and returns their stored messages from MongoDB.",
+      "tags": [
+        "flask-restful",
+        "resource",
+        "retrieve",
+        "authentication",
+        "mongodb"
+      ],
+      "complexity": "moderate",
+      "exports": [
+        "post"
+      ]
+    },
+    {
+      "id": "class:web/app.py:Save",
+      "type": "class",
+      "name": "Save",
+      "filePath": "web/app.py",
+      "summary": "Flask-RESTful Resource class exposing a POST endpoint at /save that authenticates a user and appends a new message to their MongoDB record.",
+      "tags": [
+        "flask-restful",
+        "resource",
+        "save",
+        "authentication",
+        "mongodb"
+      ],
+      "complexity": "moderate",
+      "exports": [
+        "post"
+      ]
+    },
+    {
+      "id": "function:web/app.py:user_exist",
+      "type": "function",
+      "name": "user_exist",
+      "filePath": "web/app.py",
+      "summary": "Helper function that checks whether a username already exists in the MongoDB users collection.",
+      "tags": [
+        "helper",
+        "mongodb",
+        "validation"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "function:web/app.py:verify_user",
+      "type": "function",
+      "name": "verify_user",
+      "filePath": "web/app.py",
+      "summary": "Helper function that verifies a user's password against the bcrypt-hashed value stored in MongoDB.",
+      "tags": [
+        "helper",
+        "bcrypt",
+        "authentication"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "function:web/app.py:get_user_messages",
+      "type": "function",
+      "name": "get_user_messages",
+      "filePath": "web/app.py",
+      "summary": "Helper function that retrieves the list of messages stored for a given username from the MongoDB users collection.",
+      "tags": [
+        "helper",
+        "mongodb",
+        "messages"
+      ],
+      "complexity": "simple",
+      "exports": []
+    },
+    {
+      "id": "config:web/requirements.txt",
+      "type": "config",
+      "name": "requirements.txt",
+      "filePath": "web/requirements.txt",
+      "summary": "Python dependency manifest for the web service listing Flask, flask_restful, pymongo, and bcrypt.",
+      "tags": [
+        "python",
+        "dependencies",
+        "pip",
+        "flask",
+        "pymongo",
+        "bcrypt"
+      ],
+      "complexity": "simple",
+      "exports": []
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:web/Dockerfile",
+      "target": "file:web/app.py",
+      "type": "configures",
+      "label": "builds and runs web/app.py as container entrypoint",
+      "direction": "forward"
+    },
+    {
+      "source": "config:docker-compose.yml",
+      "target": "config:web/Dockerfile",
+      "type": "configures",
+      "label": "defines web service built from ./web",
+      "direction": "forward"
+    },
+    {
+      "source": "config:docker-compose.yml",
+      "target": "config:db/Dockerfile",
+      "type": "configures",
+      "label": "defines my_db service built from ./db",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "class:web/app.py:Hello",
+      "type": "contains",
+      "label": "defines Hello resource class",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "class:web/app.py:Register",
+      "type": "contains",
+      "label": "defines Register resource class",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "class:web/app.py:Retrieve",
+      "type": "contains",
+      "label": "defines Retrieve resource class",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "class:web/app.py:Save",
+      "type": "contains",
+      "label": "defines Save resource class",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "function:web/app.py:user_exist",
+      "type": "contains",
+      "label": "defines user_exist helper",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "function:web/app.py:verify_user",
+      "type": "contains",
+      "label": "defines verify_user helper",
+      "direction": "forward"
+    },
+    {
+      "source": "file:web/app.py",
+      "target": "function:web/app.py:get_user_messages",
+      "type": "contains",
+      "label": "defines get_user_messages helper",
+      "direction": "forward"
+    },
+    {
+      "source": "config:web/requirements.txt",
+      "target": "file:web/app.py",
+      "type": "configures",
+      "label": "provides Python dependencies for app.py",
+      "direction": "forward"
+    }
+  ],
+  "layers": [
+    {
+      "id": "api-layer",
+      "name": "API Layer",
+      "description": "Flask REST application code that defines HTTP resources, authentication helpers, and MongoDB-backed request handling.",
+      "nodeIds": [
+        "file:web/app.py",
+        "class:web/app.py:Hello",
+        "class:web/app.py:Register",
+        "class:web/app.py:Retrieve",
+        "class:web/app.py:Save",
+        "function:web/app.py:user_exist",
+        "function:web/app.py:verify_user",
+        "function:web/app.py:get_user_messages"
+      ]
+    },
+    {
+      "id": "infrastructure-layer",
+      "name": "Infrastructure",
+      "description": "Containerization, service orchestration, and runtime dependency configuration for the Flask API and MongoDB services.",
+      "nodeIds": [
+        "config:docker-compose.yml",
+        "config:web/Dockerfile",
+        "config:db/Dockerfile",
+        "config:web/requirements.txt"
+      ]
+    },
+    {
+      "id": "documentation-layer",
+      "name": "Documentation",
+      "description": "Project-level documentation and licensing that explain usage, setup, and legal terms.",
+      "nodeIds": [
+        "document:README.md",
+        "document:LICENSE.md"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "stepIndex": 1,
+      "title": "Project Overview and Documentation",
+      "description": "Start here to understand what the project is about and how to run it. The README provides build/run instructions using Docker Compose and explains how to test the API endpoints with Postman.",
+      "nodeIds": [
+        "document:README.md"
+      ]
+    },
+    {
+      "stepIndex": 2,
+      "title": "Container Orchestration with Docker Compose",
+      "description": "Understand how the two services \u2014 the Flask web app and MongoDB database \u2014 are wired together. Docker Compose defines port mappings, service linking, and build contexts for both containers.",
+      "nodeIds": [
+        "config:docker-compose.yml",
+        "config:web/Dockerfile",
+        "config:db/Dockerfile"
+      ]
+    },
+    {
+      "stepIndex": 3,
+      "title": "Python Dependencies and App Entry Point",
+      "description": "Explore the dependency manifest to see which libraries power the API: Flask, flask_restful, pymongo, and bcrypt. The web Dockerfile installs these and launches app.py as the container entrypoint.",
+      "nodeIds": [
+        "config:web/requirements.txt",
+        "file:web/app.py"
+      ]
+    },
+    {
+      "stepIndex": 4,
+      "title": "First API Endpoint: Hello World",
+      "description": "Start with the simplest endpoint to understand how flask_restful Resource classes are structured. The Hello class shows the minimal pattern: a GET method that returns a static response.",
+      "nodeIds": [
+        "class:web/app.py:Hello"
+      ]
+    },
+    {
+      "stepIndex": 5,
+      "title": "User Registration and Authentication Endpoints",
+      "description": "Examine the Register, Retrieve, and Save resources to understand the full user lifecycle: creating an account with a hashed password, authenticating to fetch stored messages, and saving new messages. These three endpoints demonstrate the core application logic.",
+      "nodeIds": [
+        "class:web/app.py:Register",
+        "class:web/app.py:Retrieve",
+        "class:web/app.py:Save"
+      ]
+    },
+    {
+      "stepIndex": 6,
+      "title": "Data Layer: MongoDB Helper Functions",
+      "description": "Dive into the three helper functions that encapsulate all direct MongoDB interactions. These functions handle username existence checks, bcrypt password verification, and message retrieval \u2014 keeping database logic separate from the resource classes.",
+      "nodeIds": [
+        "function:web/app.py:user_exist",
+        "function:web/app.py:verify_user",
+        "function:web/app.py:get_user_messages"
+      ]
+    }
+  ],
+  "project": {
+    "name": "python_rest_tutorial",
+    "description": "A simple Flask REST API with MongoDB backend, containerized using Docker and docker-compose. Provides user registration, authentication, and message storage endpoints.",
+    "languages": [
+      "Python",
+      "Dockerfile",
+      "YAML",
+      "Markdown"
+    ],
+    "frameworks": [
+      "Flask",
+      "Flask-RESTful",
+      "PyMongo"
+    ],
+    "gitCommitHash": "dc03ec32510d2e8db7ffd7c1347eeb28d9161e8a",
+    "analyzedAt": "2026-05-29T13:17:09.819387+00:00"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "projectRoot": "/home/dewald/Workspace/personal/github/python_rest_tutorial",
+  "gitCommitHash": "dc03ec32510d2e8db7ffd7c1347eeb28d9161e8a",
+  "generatedAt": "2026-05-29T13:17:47.718928+00:00",
+  "stats": {
+    "totalNodes": 14,
+    "totalEdges": 11,
+    "totalLayers": 3,
+    "tourSteps": 6
+  }
+}

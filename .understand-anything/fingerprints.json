@@ -1,0 +1,176 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "dc03ec32510d2e8db7ffd7c1347eeb28d9161e8a",
+  "generatedAt": "2026-05-29T13:17:47.582Z",
+  "files": {
+    "web/app.py": {
+      "filePath": "web/app.py",
+      "contentHash": "01bf478abffabddd1b522a837a51bbe1ca29378c9508f33599bca94bd141efbd",
+      "functions": [
+        {
+          "name": "user_exist",
+          "params": [
+            "username"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "verify_user",
+          "params": [
+            "username",
+            "password"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "get_user_messages",
+          "params": [
+            "username"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "Hello",
+          "methods": [
+            "get"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "Register",
+          "methods": [
+            "post"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "Retrieve",
+          "methods": [
+            "post"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "Save",
+          "methods": [
+            "post"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 52
+        }
+      ],
+      "imports": [
+        {
+          "source": "bcrypt",
+          "specifiers": [
+            "bcrypt"
+          ]
+        },
+        {
+          "source": "flask",
+          "specifiers": [
+            "Flask",
+            "jsonify",
+            "request"
+          ]
+        },
+        {
+          "source": "flask_restful",
+          "specifiers": [
+            "Api",
+            "Resource"
+          ]
+        },
+        {
+          "source": "pymongo",
+          "specifiers": [
+            "MongoClient"
+          ]
+        }
+      ],
+      "exports": [
+        "user_exist",
+        "verify_user",
+        "get_user_messages",
+        "Hello",
+        "Register",
+        "Retrieve",
+        "Save"
+      ],
+      "totalLines": 189,
+      "hasStructuralAnalysis": true
+    },
+    "web/Dockerfile": {
+      "filePath": "web/Dockerfile",
+      "contentHash": "e581c5a4b60fb1147fddd536dab117bac4500afb455d3146560ec0d8a99cf478",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "web/requirements.txt": {
+      "filePath": "web/requirements.txt",
+      "contentHash": "664fea8c3871c37e30cb1e64aa944e7019c61f22cff0739a4a436a9dea9162c7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "db/Dockerfile": {
+      "filePath": "db/Dockerfile",
+      "contentHash": "042f07ca02b36cda44c8000a480424c76d95e4ad4c044053dcefbff8705b7282",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "cbe3c0839fa47f011683c6252f83b1462aea692226a8832198b3416cf0986f12",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "9685ab0e2b5111b673ceccfa7e0df683c6cf41e61f222f129f151123c9931d3f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 42,
+      "hasStructuralAnalysis": true
+    },
+    "LICENSE.md": {
+      "filePath": "LICENSE.md",
+      "contentHash": "fe9e5fd6fdef6c4c8a06554ea936e00e3c6e6ff8c9cc4d1d59f64f0995e570d8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
