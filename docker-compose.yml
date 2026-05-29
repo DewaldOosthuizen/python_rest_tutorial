@@ -6,6 +6,8 @@ services:
       - "5000:5000"
     links:
       - my_db
+    environment:
+      - MONGO_URI=mongodb://my_db:27017/
   my_db:
     build: "./db"
     # Instead of building the database from a docker file, you can use an image directly

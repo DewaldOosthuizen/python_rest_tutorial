@@ -40,6 +40,19 @@ to force the data to be read as JSON.
 
 For reference have a look at <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1>
 
+## Environment Variables
+
+The application is configured via environment variables. Copy the example file to get started:
+
+```shell
+cp .env.example .env
+```
+
+| Variable   | Default                   | Description                                                                      |
+|------------|---------------------------|----------------------------------------------------------------------------------|
+| MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
+
+
 ## Running the tests
 
 ```bash
