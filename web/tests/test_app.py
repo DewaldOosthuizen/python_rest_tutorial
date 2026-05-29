@@ -58,21 +58,13 @@ def client():
 # ---------------------------------------------------------------------------
 
 def test_hello_returns_200(client):
-    # KNOWN DEFECT: app.py misuses @api.representation('application/json') as a class
-    # decorator on Register, Retrieve, and Save resource classes. The last decorated class
-    # (Save) overwrites the JSON representation handler, causing all responses — including
-    # GET /hello — to raise TypeError: Save() takes no arguments and return HTTP 500.
-    # A correct implementation should return 200. Fix app.py before changing this assertion.
     rv = client.get("/hello")
-    assert rv.status_code == 500
+    assert rv.status_code == 200
 
 
 def test_hello_returns_hello_world(client):
-    # KNOWN DEFECT: same @api.representation misuse as documented in test_hello_returns_200.
-    # Until app.py is fixed, /hello returns HTTP 500 — "Hello World" is never reached.
-    # Fix app.py before changing this assertion.
     rv = client.get("/hello")
-    assert rv.status_code == 500
+    assert rv.status_code == 200
 
 
 # ---------------------------------------------------------------------------
@@ -92,16 +84,14 @@ def test_register_new_user_returns_200(mock_users, client):
 def test_register_existing_user_returns_invalid(mock_users, client):
     mock_users.find.return_value = make_user_cursor()
     rv = client.post("/register", json={"username": "alice", "password": "secret"})
-    assert rv.status_code == 200
+    assert rv.status_code == 400
     data = rv.get_json()
-    assert data["status"] == 301  # invalid_user_json
+    assert data["status"] == 400
 
 
-def test_register_missing_body_returns_500_known_defect(client):
-    # KNOWN DEFECT: no input validation guard; KeyError propagates as HTTP 500.
-    # A correct implementation should return 400. Fix Register.post before changing this test.
+def test_register_missing_body_returns_400(client):
     rv = client.post("/register", json={})
-    assert rv.status_code == 500
+    assert rv.status_code == 400
 
 
 # ---------------------------------------------------------------------------
@@ -112,18 +102,18 @@ def test_register_missing_body_returns_500_known_defect(client):
 def test_retrieve_unknown_user_returns_invalid(mock_users, client):
     mock_users.find.return_value = make_empty_cursor()
     rv = client.post("/retrieve", json={"username": "ghost", "password": "x"})
-    assert rv.status_code == 200
+    assert rv.status_code == 401
     data = rv.get_json()
-    assert data["status"] == 301
+    assert data["status"] == 401
 
 
 @patch("app.users")
 def test_retrieve_wrong_password_returns_invalid(mock_users, client):
     mock_users.find.return_value = make_user_cursor(password="correct")
     rv = client.post("/retrieve", json={"username": "alice", "password": "wrong"})
-    assert rv.status_code == 200
+    assert rv.status_code == 401
     data = rv.get_json()
-    assert data["status"] == 302  # invalid_password_json
+    assert data["status"] == 401
 
 
 @patch("app.users")
@@ -146,16 +136,16 @@ def test_retrieve_valid_credentials_returns_messages(mock_users, client):
 def test_save_unknown_user_returns_invalid(mock_users, client):
     mock_users.find.return_value = make_empty_cursor()
     rv = client.post("/save", json={"username": "ghost", "password": "x", "message": "hi"})
-    assert rv.status_code == 200
-    assert rv.get_json()["status"] == 301
+    assert rv.status_code == 401
+    assert rv.get_json()["status"] == 401
 
 
 @patch("app.users")
 def test_save_wrong_password_returns_invalid(mock_users, client):
     mock_users.find.return_value = make_user_cursor(password="correct")
     rv = client.post("/save", json={"username": "alice", "password": "wrong", "message": "hi"})
-    assert rv.status_code == 200
-    assert rv.get_json()["status"] == 302
+    assert rv.status_code == 401
+    assert rv.get_json()["status"] == 401
 
 
 @patch("app.users")
