@@ -51,3 +51,12 @@ cp .env.example .env
 | Variable   | Default                   | Description                                                                      |
 |------------|---------------------------|----------------------------------------------------------------------------------|
 | MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
+
+
+## Running the tests
+
+```bash
+cd web
+pip install -r requirements.txt
+pytest
+```
