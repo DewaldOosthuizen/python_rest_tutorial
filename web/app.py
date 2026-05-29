@@ -1,4 +1,5 @@
 # import functools
+import os
 import bcrypt
 
 from flask import Flask, jsonify, request
@@ -9,7 +10,8 @@ from pymongo import MongoClient
 app = Flask(__name__)
 api = Api(app)
 
-client = MongoClient("mongodb://my_db:27017")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://my_db:27017/")
+client = MongoClient(MONGO_URI)
 db = client.projectDB
 users = db["Users"]
 invalid_user_json = {"status": 301, "msg": "Invalid Username"}
