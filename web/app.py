@@ -12,8 +12,6 @@ api = Api(app)
 client = MongoClient("mongodb://my_db:27017")
 db = client.projectDB
 users = db["Users"]
-invalid_user_json = {"status": 301, "msg": "Invalid Username"}
-invalid_password_json = {"status": 302, "msg": "Invalid password"}
 
 """
 HELPER FUNCTIONS
@@ -42,11 +40,12 @@ def get_user_messages(username):
     })[0]["Messages"]
 
 
+
 """
 RESOURCES
 """
 
-@api.representation('application/json')
+
 class Hello(Resource):
     """
     This is the Hello resource class
@@ -55,22 +54,21 @@ class Hello(Resource):
     def get(self):
         return "Hello World!"
 
-@api.representation('application/json')
 class Register(Resource):
     """
     This is the Register resource class
     """
 
     def post(self):
-        # Get posted data from request
-        data = request.get_json()
-
-        username = data["username"]
-        password = data["password"]
-
-        # check if user exists
+        data = request.get_json(silent=True, force=True)
+        if not data:
+            return {"status": 400, "msg": "Request body must be valid JSON"}, 400
+        username = data.get("username")
+        password = data.get("password")
+        if not username or not password:
+            return {"status": 400, "msg": "username and password are required"}, 400
         if user_exist(username):
-            return jsonify(invalid_user_json)
+            return {"status": 400, "msg": "User already exists"}, 400
 
         # encrypt password
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
@@ -82,78 +80,51 @@ class Register(Resource):
             "Messages": []
         })
 
-        # Return successful result
-        ret_json = {
-            "status": 200,
-            "msg": "Registration successful"
-        }
-        return jsonify(ret_json)
+        return {"status": 200, "msg": "Registration successful"}, 200
 
-@api.representation('application/json')
 class Retrieve(Resource):
     """
     This is the Retrieve resource class
     """
 
     def post(self):
-         # Get posted data from request
-        data = request.get_json()
-
-        # get data
-        username = data["username"]
-        password = data["password"]
-
-        # check if user exists
+        data = request.get_json(silent=True, force=True)
+        if not data:
+            return {"status": 400, "msg": "Request body must be valid JSON"}, 400
+        username = data.get("username")
+        password = data.get("password")
+        if not username or not password:
+            return {"status": 400, "msg": "username and password are required"}, 400
         if not user_exist(username):
-            return jsonify(invalid_user_json)
-
-        # check password
-        correct_pw = verify_user(username, password)
-        if not correct_pw:
-            return jsonify(invalid_password_json)
+            return {"status": 401, "msg": "Invalid credentials"}, 401
+        if not verify_user(username, password):
+            return {"status": 401, "msg": "Invalid credentials"}, 401
 
         # get the messages
         messages = get_user_messages(username)
 
-        # Build successful response
-        ret_json = {
-            "status": 200,
-            "obj": messages
-        }
+        return {"status": 200, "obj": messages}, 200
 
-        return jsonify(ret_json)
-
-@api.representation('application/json')
 class Save(Resource):
     """
     This is the Save resource class
     """
 
     def post(self):
-
-         # Get posted data from request
-        data = request.get_json()
-
-        # get data
-        username = data["username"]
-        password = data["password"]
-        message = data["message"]
-
-        # check if user exists
-        if not user_exist(username):
-            return jsonify(invalid_user_json)
-
-        # check password
-        correct_pw = verify_user(username, password)
-        if not correct_pw:
-            return jsonify(invalid_password_json)
-
+        data = request.get_json(silent=True, force=True)
+        if not data:
+            return {"status": 400, "msg": "Request body must be valid JSON"}, 400
+        username = data.get("username")
+        password = data.get("password")
+        message = data.get("message")
+        if not username or not password:
+            return {"status": 400, "msg": "username and password are required"}, 400
         if not message:
-            ret_json = {
-                "status": 303,
-                "msg": "Please supply a valid message"
-            }
-            return jsonify(ret_json)
+            return {"status": 400, "msg": "message is required"}, 400
+        if not user_exist(username):
+            return {"status": 401, "msg": "Invalid credentials"}, 401
+        if not verify_user(username, password):
+            return {"status": 401, "msg": "Invalid credentials"}, 401
 
         # get the messages
         messages = get_user_messages(username)
@@ -170,12 +141,7 @@ class Save(Resource):
             }
         })
 
-        ret_json = {
-            "status": 200,
-            "msg": "Message has been saved successfully"
-        }
-
-        return jsonify(ret_json)
+        return {"status": 200, "msg": "Message has been saved successfully"}, 200
 
 
 api.add_resource(Hello, '/hello')
