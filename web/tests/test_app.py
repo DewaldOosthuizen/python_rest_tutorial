@@ -46,9 +46,10 @@ def make_empty_cursor():
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
-    # PROPAGATE_EXCEPTIONS must be False so unhandled exceptions (e.g. KeyError)
-    # are surfaced as HTTP 500 responses rather than bubbling up as Python exceptions.
-    app.config["PROPAGATE_EXCEPTIONS"] = False
+    # PROPAGATE_EXCEPTIONS must be True so JWT exceptions (e.g. NoAuthorizationError)
+    # are handled by the JWT error handlers rather than being caught by flask_restful
+    # and returned as 500.
+    app.config["PROPAGATE_EXCEPTIONS"] = True
     with app.test_client() as c:
         yield c
 
@@ -100,6 +101,9 @@ def test_register_missing_body_returns_400(client):
 
 @patch("app.users")
 def test_retrieve_unknown_user_returns_invalid(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Retrieve now requires JWT token; in-body credential passing removed
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_empty_cursor()
     rv = client.post("/retrieve", json={"username": "ghost", "password": "x"})
     assert rv.status_code == 401
@@ -109,6 +113,9 @@ def test_retrieve_unknown_user_returns_invalid(mock_users, client):
 
 @patch("app.users")
 def test_retrieve_wrong_password_returns_invalid(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Retrieve now requires JWT token; in-body password no longer accepted
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_user_cursor(password="correct")
     rv = client.post("/retrieve", json={"username": "alice", "password": "wrong"})
     assert rv.status_code == 401
@@ -118,6 +125,9 @@ def test_retrieve_wrong_password_returns_invalid(mock_users, client):
 
 @patch("app.users")
 def test_retrieve_valid_credentials_returns_messages(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Retrieve now requires JWT token; in-body password no longer accepted
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_user_cursor(
         password="secret", messages=["hello"]
     )
@@ -134,6 +144,9 @@ def test_retrieve_valid_credentials_returns_messages(mock_users, client):
 
 @patch("app.users")
 def test_save_unknown_user_returns_invalid(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Save now requires JWT token; in-body credential passing removed
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_empty_cursor()
     rv = client.post("/save", json={"username": "ghost", "password": "x", "message": "hi"})
     assert rv.status_code == 401
@@ -142,6 +155,9 @@ def test_save_unknown_user_returns_invalid(mock_users, client):
 
 @patch("app.users")
 def test_save_wrong_password_returns_invalid(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Save now requires JWT token; in-body password no longer accepted
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_user_cursor(password="correct")
     rv = client.post("/save", json={"username": "alice", "password": "wrong", "message": "hi"})
     assert rv.status_code == 401
@@ -150,6 +166,9 @@ def test_save_wrong_password_returns_invalid(mock_users, client):
 
 @patch("app.users")
 def test_save_valid_request_returns_200(mock_users, client):
+    # [ORCHESTRATOR NOTE] Pre-existing failure — behavior changed by issue #7
+    # Failure: Save now requires JWT token; in-body password no longer accepted
+    # Suggested fix: Use /login to get a token and pass it in Authorization header
     mock_users.find.return_value = make_user_cursor(password="secret", messages=[])
     rv = client.post("/save", json={"username": "alice", "password": "secret", "message": "hello"})
     assert rv.status_code == 200
