@@ -154,3 +154,100 @@ def test_save_valid_request_returns_200(mock_users, client):
     rv = client.post("/save", json={"username": "alice", "password": "secret", "message": "hello"})
     assert rv.status_code == 200
     assert rv.get_json()["status"] == 200
+
+
+# ---------------------------------------------------------------------------
+# Login (issue #7 - JWT token-based auth)
+# ---------------------------------------------------------------------------
+
+@patch("app.users")
+def test_login_valid_credentials_returns_token(mock_users, client):
+    mock_users.find.return_value = make_user_cursor(username="alice", password="secret")
+    rv = client.post("/login", json={"username": "alice", "password": "secret"})
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert "access_token" in data
+
+
+@patch("app.users")
+def test_login_wrong_password_returns_401(mock_users, client):
+    mock_users.find.return_value = make_user_cursor(username="alice", password="correct")
+    rv = client.post("/login", json={"username": "alice", "password": "wrong"})
+    assert rv.status_code == 401
+
+
+@patch("app.users")
+def test_login_unknown_user_returns_401(mock_users, client):
+    mock_users.find.return_value = make_empty_cursor()
+    rv = client.post("/login", json={"username": "ghost", "password": "x"})
+    assert rv.status_code == 401
+
+
+def test_login_missing_body_returns_400(client):
+    rv = client.post("/login", json={})
+    assert rv.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Retrieve with JWT (issue #7)
+# ---------------------------------------------------------------------------
+
+@patch("app.users")
+def test_retrieve_with_token_returns_messages(mock_users, client):
+    """After issue #7: Retrieve uses JWT token, no password in body."""
+    mock_users.find.return_value = make_user_cursor(
+        username="alice", password="secret", messages=["hello"]
+    )
+    # First get a token
+    login_rv = client.post("/login", json={"username": "alice", "password": "secret"})
+    assert login_rv.status_code == 200
+    token = login_rv.get_json()["access_token"]
+
+    mock_users.find.return_value = make_user_cursor(
+        username="alice", password="secret", messages=["hello"]
+    )
+    rv = client.post(
+        "/retrieve",
+        json={"username": "alice"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert rv.status_code == 200
+    assert "hello" in rv.get_json()["obj"]
+
+
+def test_retrieve_without_token_returns_401(client):
+    """After issue #7: Retrieve requires JWT token."""
+    rv = client.post("/retrieve", json={"username": "alice"})
+    assert rv.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Save with JWT (issue #7)
+# ---------------------------------------------------------------------------
+
+@patch("app.users")
+def test_save_with_token_returns_200(mock_users, client):
+    """After issue #7: Save uses JWT token, no password in body."""
+    mock_users.find.return_value = make_user_cursor(
+        username="alice", password="secret", messages=[]
+    )
+    login_rv = client.post("/login", json={"username": "alice", "password": "secret"})
+    assert login_rv.status_code == 200
+    token = login_rv.get_json()["access_token"]
+
+    mock_users.find.return_value = make_user_cursor(
+        username="alice", password="secret", messages=[]
+    )
+    rv = client.post(
+        "/save",
+        json={"username": "alice", "message": "hello"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert rv.status_code == 200
+    assert rv.get_json()["status"] == 200
+
+
+def test_save_without_token_returns_401(client):
+    """After issue #7: Save requires JWT token."""
+    rv = client.post("/save", json={"username": "alice", "message": "hi"})
+    assert rv.status_code == 401
