@@ -60,3 +60,27 @@ cd web
 pip install -r requirements.txt
 pytest
 ```
+
+## Dependencies
+
+All runtime and development dependencies are pinned to exact versions in web/requirements.txt
+to ensure reproducible builds and avoid unexpected breakage from upstream changes.
+
+| Package        | Pinned Version | Role               |
+|----------------|----------------|--------------------|
+| Flask          | 2.2.5          | Web framework      |
+| Werkzeug       | 2.3.7          | WSGI utilities     |
+| flask-restful  | 0.3.10         | REST API helpers   |
+| pymongo        | 3.12.3         | MongoDB driver     |
+| bcrypt         | 4.0.1          | Password hashing   |
+| pytest         | 7.4.4          | Test runner (dev)  |
+
+Rationale: Floating version specifiers (>=) allow pip to silently pull in
+breaking releases. Exact pins (==) guarantee that every environment — local,
+CI, and Docker — runs the same code.
+
+Upgrade procedure:
+1. Update the version number in web/requirements.txt.
+2. Rebuild/reinstall: pip install -r web/requirements.txt
+3. Run the full test suite: cd web && pytest
+4. If all tests pass, commit the updated requirements.txt.
