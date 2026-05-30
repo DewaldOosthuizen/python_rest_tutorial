@@ -48,9 +48,10 @@ The application is configured via environment variables. Copy the example file t
 cp .env.example .env
 ```
 
-| Variable   | Default                   | Description                                                                      |
-|------------|---------------------------|----------------------------------------------------------------------------------|
-| MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
+| Variable        | Default                              | Description                                                                      |
+|-----------------|--------------------------------------|----------------------------------------------------------------------------------|
+| MONGO_URI       | mongodb://my_db:27017/               | MongoDB connection string. Override with credentials for remote/secured instances.|
+| JWT_SECRET_KEY  | change-me-in-production-32chars!!    | Secret key for signing JWT tokens. Set a strong random value in production.      |
 
 
 ## Running the tests
@@ -60,3 +61,49 @@ cd web
 pip install -r requirements.txt
 pytest
 ```
+
+## Authentication
+
+The API uses JWT (JSON Web Token) based authentication. Follow these steps:
+
+### 1. Register a new user
+
+```bash
+curl -X POST http://localhost:5000/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "s3cr3t"}'
+```
+
+### 2. Login and obtain a token
+
+```bash
+curl -X POST http://localhost:5000/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "s3cr3t"}'
+```
+
+Response:
+```json
+{"access_token": "<your-jwt-token>"}
+```
+
+### 3. Retrieve messages (requires token)
+
+```bash
+curl -X POST http://localhost:5000/retrieve \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{}'
+```
+
+### 4. Save a message (requires token)
+
+```bash
+curl -X POST http://localhost:5000/save \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{"message": "Hello, World!"}'
+```
+
+The JWT_SECRET_KEY environment variable should be set to a strong secret in production.
+See the Environment Variables section above for details.
