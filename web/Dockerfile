@@ -1,5 +1,5 @@
 # Pull python 3 image
-FROM python:3
+FROM python:3.11-slim
 # Create a work dir
 WORKDIR /usr/src/app
 # copy requirements.txt into workdir created above

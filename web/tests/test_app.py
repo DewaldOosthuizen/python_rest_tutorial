@@ -225,6 +225,31 @@ def test_save_missing_message_returns_400(mock_users, client):
     rv = client.post(
         "/save",
         json={},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": "Bearer " + token},
     )
     assert rv.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# insert_one / update_one API migration (issue #6)
+# ---------------------------------------------------------------------------
+
+@patch("app.users")
+def test_register_calls_insert_one(mock_users, client):
+    """Register must use insert_one (not the deprecated insert)."""
+    mock_users.find.return_value = make_empty_cursor()
+    client.post("/register", json={"username": "bob", "password": "pass"})
+    mock_users.insert_one.assert_called_once()
+
+
+@patch("app.users")
+def test_save_calls_update_one(mock_users, client):
+    """Save must use update_one (not the deprecated update)."""
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=[])
+    token = make_valid_token(username="alice")
+    client.post(
+        "/save",
+        json={"message": "hi"},
+        headers={"Authorization": "Bearer " + token},
+    )
+    mock_users.update_one.assert_called_once()

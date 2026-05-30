@@ -96,7 +96,7 @@ class Register(Resource):
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
 
         # Insert record
-        users.insert({
+        users.insert_one({
             "Username": username,
             "Password": hashed_pw,
             "Messages": []
@@ -148,7 +148,15 @@ class Save(Resource):
         username = request.username
         messages = get_user_messages(username)
         messages.append(message)
-        users.update({"Username": username}, {"$set": {"Messages": messages}})
+
+        # save the new user message
+        users.update_one({
+            "Username": username
+        }, {
+            "$set": {
+                "Messages": messages
+            }
+        })
         return {"status": 200, "msg": "Message has been saved successfully"}, 200
 
 
