@@ -11,3 +11,8 @@ dist/
 build/
 .vscode/
 .idea/
+# workspace-orchestrator managed entries
+.hermes_tmp_prompt.txt
+.understand-anything/intermediate/
+.understand-anything/diff-overlay.json
+graphify-out/cache/
