@@ -1,0 +1,10 @@
+REJECTED
+Reason: The implementation in web/app.py is complete and correct — JWT imports, SECRET from env, requires_auth decorator, Login resource, updated Retrieve/Save, route registration, and PyJWT in requirements.txt all match the spec exactly. The new test suite in web/tests/test_app.py also covers all required scenarios. However, the legacy test file at tests/test_app.py was never updated and directly violates the tasks.md requirement to update all existing tests. It still sends username+password in the body for /retrieve and /save (e.g. test_retrieve_success, test_save_success), patches the old verify_user/user_exist helpers, and its fixture never sets JWT_SECRET before reloading app — so os.environ["JWT_SECRET"] will raise a KeyError on module load, crashing the entire suite.
+
+Fix required:
+- tests/test_app.py: Set os.environ["JWT_SECRET"] = "testsecret" before importing/reloading app in the fixture, or remove it if web/tests/test_app.py is now the canonical test file.
+- tests/test_app.py: test_retrieve_no_body now returns 401 (no auth header), not 400 — assertion must change.
+- tests/test_app.py: test_retrieve_success sends no Bearer token; it will receive 401 instead of 200 — must be rewritten to supply a valid JWT Authorization header instead of username+password in the body.
+- tests/test_app.py: test_retrieve_invalid_credentials_no_user and test_retrieve_invalid_credentials_wrong_password still test the old plaintext body pattern; they need to be replaced with token-based equivalents or removed (duplicates of coverage already in web/tests/test_app.py).
+- tests/test_app.py: test_save_no_body, test_save_missing_message, test_save_invalid_credentials, test_save_success all suffer from the same stale pattern — no Bearer token supplied, verify_user/user_exist patching is no longer meaningful for auth, assertions will be wrong.
+- Either delete tests/test_app.py entirely (it is now a stale duplicate of web/tests/test_app.py) or fully migrate it to the token-based contract. The tasks.md is unambiguous: "Update any existing tests for /retrieve and /save that sent username+password in the body."
