@@ -51,6 +51,48 @@ cp .env.example .env
 | Variable   | Default                   | Description                                                                      |
 |------------|---------------------------|----------------------------------------------------------------------------------|
 | MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
+| JWT_SECRET | *(required)*              | Secret key used to sign and verify JWT tokens. Must be a long random string. Never hardcode or commit this value. |
+
+
+## Authentication
+
+The API uses JWT (JSON Web Token) bearer authentication.
+
+### 1. Obtain a token — POST /login
+
+Send your credentials once to receive a signed token:
+
+```shell
+curl -X POST http://localhost:5000/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "secret"}'
+```
+
+Response (200 OK):
+
+```json
+{"status": 200, "token": "<signed-jwt>"}
+```
+
+On invalid credentials the endpoint returns 401 with `{"status": 401, "msg": "Invalid credentials"}`.
+
+### 2. Call protected endpoints — Authorization: Bearer
+
+Pass the token in the `Authorization` header on every call to `/retrieve` and `/save`:
+
+```shell
+# Retrieve messages
+curl -X POST http://localhost:5000/retrieve \
+  -H "Authorization: Bearer <token>"
+
+# Save a message
+curl -X POST http://localhost:5000/save \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello!"}'
+```
+
+Missing, expired, or tampered tokens return 401 Unauthorized.
 
 
 ## Running the tests
@@ -66,14 +108,15 @@ pytest
 All runtime and development dependencies are pinned to exact versions in web/requirements.txt
 to ensure reproducible builds and avoid unexpected breakage from upstream changes.
 
-| Package        | Pinned Version | Role               |
+| Package        | Version        | Role               |
 |----------------|----------------|--------------------|
 | Flask          | 2.2.5          | Web framework      |
 | Werkzeug       | 2.3.7          | WSGI utilities     |
 | flask-restful  | 0.3.10         | REST API helpers   |
-| pymongo        | 3.12.3         | MongoDB driver     |
+| pymongo        | 4.6.3          | MongoDB driver     |
 | bcrypt         | 4.0.1          | Password hashing   |
-| pytest         | 7.4.4          | Test runner (dev)  |
+| PyJWT          | >=2.8.0        | JWT authentication |
+| pytest         | 9.0.3          | Test runner (dev)  |
 
 Rationale: Floating version specifiers (>=) allow pip to silently pull in
 breaking releases. Exact pins (==) guarantee that every environment — local,

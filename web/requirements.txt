@@ -3,5 +3,6 @@ Werkzeug==2.3.7
 flask-restful==0.3.10
 pymongo==4.6.3
 bcrypt==4.0.1
+PyJWT>=2.8.0
 # dev / test
 pytest==9.0.3
