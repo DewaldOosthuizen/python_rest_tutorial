@@ -154,3 +154,23 @@ def test_save_valid_request_returns_200(mock_users, client):
     rv = client.post("/save", json={"username": "alice", "password": "secret", "message": "hello"})
     assert rv.status_code == 200
     assert rv.get_json()["status"] == 200
+
+
+# ---------------------------------------------------------------------------
+# insert_one / update_one API migration (issue #6)
+# ---------------------------------------------------------------------------
+
+@patch("app.users")
+def test_register_calls_insert_one(mock_users, client):
+    """Register must use insert_one (not the deprecated insert)."""
+    mock_users.find.return_value = make_empty_cursor()
+    client.post("/register", json={"username": "bob", "password": "pass"})
+    mock_users.insert_one.assert_called_once()
+
+
+@patch("app.users")
+def test_save_calls_update_one(mock_users, client):
+    """Save must use update_one (not the deprecated update)."""
+    mock_users.find.return_value = make_user_cursor(password="secret", messages=[])
+    client.post("/save", json={"username": "alice", "password": "secret", "message": "hi"})
+    mock_users.update_one.assert_called_once()
