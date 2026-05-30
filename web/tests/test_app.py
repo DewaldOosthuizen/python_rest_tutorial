@@ -18,7 +18,7 @@ import jwt
 from unittest.mock import MagicMock, patch
 
 # Set JWT_SECRET before importing app
-os.environ.setdefault("JWT_SECRET", "testsecret")
+os.environ["JWT_SECRET"] = "testsecret"
 
 from app import app
 
