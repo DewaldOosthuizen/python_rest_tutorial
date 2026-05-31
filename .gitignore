@@ -14,7 +14,6 @@ build/
 .venv/
 .pytest_cache/
 .coverage
-.coverage.*
 htmlcov/
 # workspace-orchestrator managed entries
 .hermes_tmp_prompt.txt
