@@ -1,37 +1,24 @@
 # import functools
+import datetime
 import os
 import bcrypt
+import jwt
+from functools import wraps
 
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 # print = functools.partial(print, flush=True)
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "change-me-in-production-32chars!!")
-jwt = JWTManager(app)
 api = Api(app)
-
-
-@jwt.unauthorized_loader
-def unauthorized_callback(reason):
-    return {"status": 401, "msg": reason}, 401
-
-
-@jwt.invalid_token_loader
-def invalid_token_callback(reason):
-    return {"status": 401, "msg": reason}, 401
-
-
-@jwt.expired_token_loader
-def expired_token_callback(jwt_header, jwt_data):
-    return {"status": 401, "msg": "Token has expired"}, 401
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://my_db:27017/")
 client = MongoClient(MONGO_URI)
 db = client.projectDB
 users = db["Users"]
+
+SECRET = os.environ["JWT_SECRET"]
 
 """
 HELPER FUNCTIONS
@@ -58,6 +45,22 @@ def get_user_messages(username):
     return users.find({
         "Username": username,
     })[0]["Messages"]
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization", "")
+        token = auth_header.removeprefix("Bearer ").strip()
+        if not token:
+            return {"status": 401, "msg": "Unauthorized"}, 401
+        try:
+            payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+            request.username = payload["sub"]
+        except jwt.PyJWTError:
+            return {"status": 401, "msg": "Unauthorized"}, 401
+        return f(*args, **kwargs)
+    return decorated
 
 
 """
@@ -93,7 +96,7 @@ class Register(Resource):
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
 
         # Insert record
-        users.insert({
+        users.insert_one({
             "Username": username,
             "Password": hashed_pw,
             "Messages": []
@@ -102,10 +105,6 @@ class Register(Resource):
         return {"status": 200, "msg": "Registration successful"}, 200
 
 class Login(Resource):
-    """
-    This is the Login resource class — issues JWT tokens (issue #7)
-    """
-
     def post(self):
         data = request.get_json(silent=True, force=True)
         if not data:
@@ -116,24 +115,21 @@ class Login(Resource):
             return {"status": 400, "msg": "username and password are required"}, 400
         if not verify_user(username, password):
             return {"status": 401, "msg": "Invalid credentials"}, 401
-
-        access_token = create_access_token(identity=username)
-        return {"access_token": access_token}, 200
+        token = jwt.encode(
+            {"sub": username, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+            SECRET,
+            algorithm="HS256",
+        )
+        return {"status": 200, "token": token}, 200
 
 class Retrieve(Resource):
     """
     This is the Retrieve resource class
     """
 
-    @jwt_required()
+    @requires_auth
     def post(self):
-        username = get_jwt_identity()
-        if not user_exist(username):
-            return {"status": 401, "msg": "Invalid credentials"}, 401
-
-        # get the messages
-        messages = get_user_messages(username)
-
+        messages = get_user_messages(request.username)
         return {"status": 200, "obj": messages}, 200
 
 class Save(Resource):
@@ -141,31 +137,26 @@ class Save(Resource):
     This is the Save resource class
     """
 
-    @jwt_required()
+    @requires_auth
     def post(self):
         data = request.get_json(silent=True, force=True)
-        username = get_jwt_identity()
-        message = data.get("message") if data else None
+        if not data:
+            return {"status": 400, "msg": "Request body must be valid JSON"}, 400
+        message = data.get("message")
         if not message:
             return {"status": 400, "msg": "message is required"}, 400
-        if not user_exist(username):
-            return {"status": 401, "msg": "Invalid credentials"}, 401
-
-        # get the messages
+        username = request.username
         messages = get_user_messages(username)
-
-        # add new message
         messages.append(message)
 
         # save the new user message
-        users.update({
+        users.update_one({
             "Username": username
         }, {
             "$set": {
                 "Messages": messages
             }
         })
-
         return {"status": 200, "msg": "Message has been saved successfully"}, 200
 
 

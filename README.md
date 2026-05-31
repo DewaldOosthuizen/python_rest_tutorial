@@ -48,10 +48,51 @@ The application is configured via environment variables. Copy the example file t
 cp .env.example .env
 ```
 
-| Variable        | Default                              | Description                                                                      |
-|-----------------|--------------------------------------|----------------------------------------------------------------------------------|
-| MONGO_URI       | mongodb://my_db:27017/               | MongoDB connection string. Override with credentials for remote/secured instances.|
-| JWT_SECRET_KEY  | change-me-in-production-32chars!!    | Secret key for signing JWT tokens. Set a strong random value in production.      |
+| Variable   | Default                   | Description                                                                      |
+|------------|---------------------------|----------------------------------------------------------------------------------|
+| MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
+| JWT_SECRET | *(required)*              | Secret key used to sign and verify JWT tokens. Must be a long random string. Never hardcode or commit this value. |
+
+
+## Authentication
+
+The API uses JWT (JSON Web Token) bearer authentication.
+
+### 1. Obtain a token — POST /login
+
+Send your credentials once to receive a signed token:
+
+```shell
+curl -X POST http://localhost:5000/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "secret"}'
+```
+
+Response (200 OK):
+
+```json
+{"status": 200, "token": "<signed-jwt>"}
+```
+
+On invalid credentials the endpoint returns 401 with `{"status": 401, "msg": "Invalid credentials"}`.
+
+### 2. Call protected endpoints — Authorization: Bearer
+
+Pass the token in the `Authorization` header on every call to `/retrieve` and `/save`:
+
+```shell
+# Retrieve messages
+curl -X POST http://localhost:5000/retrieve \
+  -H "Authorization: Bearer <token>"
+
+# Save a message
+curl -X POST http://localhost:5000/save \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello!"}'
+```
+
+Missing, expired, or tampered tokens return 401 Unauthorized.
 
 
 ## Running the tests
@@ -62,48 +103,27 @@ pip install -r requirements.txt
 pytest
 ```
 
-## Authentication
+## Dependencies
 
-The API uses JWT (JSON Web Token) based authentication. Follow these steps:
+All runtime and development dependencies are pinned to exact versions in web/requirements.txt
+to ensure reproducible builds and avoid unexpected breakage from upstream changes.
 
-### 1. Register a new user
+| Package        | Version        | Role               |
+|----------------|----------------|--------------------|
+| Flask          | 2.2.5          | Web framework      |
+| Werkzeug       | 2.3.7          | WSGI utilities     |
+| flask-restful  | 0.3.10         | REST API helpers   |
+| pymongo        | 4.6.3          | MongoDB driver     |
+| bcrypt         | 4.0.1          | Password hashing   |
+| PyJWT          | >=2.8.0        | JWT authentication |
+| pytest         | 9.0.3          | Test runner (dev)  |
 
-```bash
-curl -X POST http://localhost:5000/register \
-  -H "Content-Type: application/json" \
-  -d '{"username": "alice", "password": "s3cr3t"}'
-```
+Rationale: Floating version specifiers (>=) allow pip to silently pull in
+breaking releases. Exact pins (==) guarantee that every environment — local,
+CI, and Docker — runs the same code.
 
-### 2. Login and obtain a token
-
-```bash
-curl -X POST http://localhost:5000/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "alice", "password": "s3cr3t"}'
-```
-
-Response:
-```json
-{"access_token": "<your-jwt-token>"}
-```
-
-### 3. Retrieve messages (requires token)
-
-```bash
-curl -X POST http://localhost:5000/retrieve \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-jwt-token>" \
-  -d '{}'
-```
-
-### 4. Save a message (requires token)
-
-```bash
-curl -X POST http://localhost:5000/save \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-jwt-token>" \
-  -d '{"message": "Hello, World!"}'
-```
-
-The JWT_SECRET_KEY environment variable should be set to a strong secret in production.
-See the Environment Variables section above for details.
+Upgrade procedure:
+1. Update the version number in web/requirements.txt.
+2. Rebuild/reinstall: pip install -r web/requirements.txt
+3. Run the full test suite: cd web && pytest
+4. If all tests pass, commit the updated requirements.txt.

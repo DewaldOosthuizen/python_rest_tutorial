@@ -1,0 +1,49 @@
+schema: spec-driven
+issue: 14
+title: "BUG: Replace per-request plaintext password auth with token-based authentication"
+created: "2026-05-30"
+status: proposed
+priority: high
+category: security
+
+affected_files:
+  - web/app.py
+  - web/requirements.txt
+
+new_files: []
+
+dependencies_added:
+  - PyJWT>=2.8.0
+
+environment_variables:
+  - name: JWT_SECRET
+    required: true
+    description: "Secret key used to sign and verify JWT tokens. Must be a long random string. Never hardcode."
+
+endpoints_changed:
+  - path: /retrieve
+    method: POST
+    change: "Remove password from request body. Authenticate via Authorization: Bearer <token> header."
+  - path: /save
+    method: POST
+    change: "Remove password and username from request body. Authenticate via Authorization: Bearer <token> header. Username sourced from token payload."
+
+endpoints_added:
+  - path: /login
+    method: POST
+    request_body:
+      username: string
+      password: string
+    response_success:
+      status: 200
+      token: "<signed JWT>"
+    response_failure:
+      status: 401
+      msg: "Invalid credentials"
+
+acceptance_criteria:
+  - "/login endpoint issues a signed JWT (HS256) on valid credentials."
+  - "/retrieve and /save accept only a Bearer token — no password in request body."
+  - "Expired or tampered tokens return 401 Unauthorized."
+  - "JWT_SECRET is sourced exclusively from environment variable — never hardcoded."
+  - "Existing tests updated; new tests cover expired/invalid token scenarios returning 401."
