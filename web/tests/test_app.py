@@ -90,7 +90,8 @@ def test_hello_returns_200(client):
 
 def test_hello_returns_hello_world(client):
     rv = client.get("/hello")
-    assert rv.status_code == 200
+    assert rv.get_json() == "Hello World!"
+    assert rv.headers["Content-Type"] == "application/json"
 
 
 # ---------------------------------------------------------------------------
