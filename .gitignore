@@ -15,11 +15,7 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
-# workspace-orchestrator managed entries
-.hermes_tmp_prompt.txt
-.understand-anything/intermediate/
-.understand-anything/diff-overlay.json
-graphify-out/cache/
+
 # BEGIN workspace-orchestrator
 .hermes_tmp_prompt.txt
 graphify-out/cache/
@@ -27,4 +23,5 @@ graphify-out/cache/
 .understand-anything/diff-overlay.json
 .codegraph/*.db
 .codegraph/cache/
+openspec/
 # END workspace-orchestrator

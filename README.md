@@ -1,5 +1,7 @@
 # python_rest_tutorial
 
+[![Tests](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/test.yml/badge.svg)](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/test.yml)
+
 This is a comprehensive guide and implementation to help developers learn how to create RESTful APIs using Python, Flask, Docker and MongoDB. It demonstrates best practices for 
 building scalable and efficient APIs, leveraging Python's capabilities alongside Docker for containerization. The repository serves as an educational 
 resource for both beginners and experienced developers looking to refine their skills in REST API development.
