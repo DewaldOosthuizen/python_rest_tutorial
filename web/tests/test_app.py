@@ -51,7 +51,7 @@ def make_empty_cursor():
 
 def make_valid_token(username="alice", secret=TEST_SECRET):
     return jwt.encode(
-        {"sub": username, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+        {"sub": username, "exp": datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=1)},
         secret,
         algorithm="HS256",
     )
@@ -59,7 +59,7 @@ def make_valid_token(username="alice", secret=TEST_SECRET):
 
 def make_expired_token(username="alice"):
     return jwt.encode(
-        {"sub": username, "exp": datetime.datetime.utcnow() - datetime.timedelta(seconds=1)},
+        {"sub": username, "exp": datetime.datetime.now(timezone.utc) - datetime.timedelta(seconds=1)},
         TEST_SECRET,
         algorithm="HS256",
     )

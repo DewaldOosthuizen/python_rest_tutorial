@@ -116,7 +116,7 @@ class Login(Resource):
         if not verify_user(username, password):
             return {"status": 401, "msg": "Invalid credentials"}, 401
         token = jwt.encode(
-            {"sub": username, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+            {"sub": username, "exp": datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=1)},
             SECRET,
             algorithm="HS256",
         )
