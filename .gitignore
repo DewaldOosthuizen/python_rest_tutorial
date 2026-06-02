@@ -20,3 +20,11 @@ htmlcov/
 .understand-anything/intermediate/
 .understand-anything/diff-overlay.json
 graphify-out/cache/
+# BEGIN workspace-orchestrator
+.hermes_tmp_prompt.txt
+graphify-out/cache/
+.understand-anything/intermediate/
+.understand-anything/diff-overlay.json
+.codegraph/*.db
+.codegraph/cache/
+# END workspace-orchestrator
