@@ -201,3 +201,9 @@ to ensure reproducible builds across local, CI, and Docker environments.
 3. Run the test suite: `pytest -v`
 4. Run the linter: `./scripts/lint.sh`
 5. If all checks pass, commit the updated `requirements.txt`.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for
+the full workflow, including how to pick up an issue, branch naming conventions,
+local validation steps, and the pull request process.
