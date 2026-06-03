@@ -11,13 +11,17 @@ API design, containerisation, JWT authentication, password hashing, and testing.
 
 Reference article: https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb
 
-Stack: Flask 2.2.5, flask-restful, pymongo, bcrypt, PyJWT, pytest, Docker + docker-compose, MongoDB.
+Stack: Flask 3.1.3, flask-restful 0.3.10, pymongo 4.7.2, bcrypt 4.1.3, PyJWT >=2.8.0, pytest 9.0.3, Ruff >=0.5.0, Docker + docker-compose, MongoDB.
 
 ## Repository Structure
 
-    web/              Python application source and tests
-    web/requirements.txt  Pinned runtime + dev dependencies
-    docker-compose.yml    Service definitions (app + MongoDB)
+    web/                  Flask application source (app.py) + Dockerfile
+    web/requirements.txt  Pinned runtime + dev dependencies (includes ruff, pytest)
+    web/tests/            Unit tests for the Flask app
+    tests/                Config-level and API-contract tests
+    scripts/lint.sh       Local lint script — mirrors CI exactly
+    pyproject.toml        Ruff linting and formatting config
+    docker-compose.yml    Service definitions: web app + MongoDB
     .env.example          Environment variable template
 
 ## Getting Started
@@ -61,9 +65,27 @@ Missing, expired, or tampered tokens return 401 Unauthorized.
 
 ## Running Tests
 
-    cd web
-    pip install -r requirements.txt
-    pytest
+Run from the project root — pytest discovers both web/tests/ and tests/:
+
+    pip install -r web/requirements.txt
+    pytest -v
+
+## Linting
+
+The project uses Ruff (replaces flake8 + isort + black). Config is in pyproject.toml.
+
+    ./scripts/lint.sh            # check only — same as CI
+    ./scripts/lint.sh --fix      # auto-fix then check
+
+## CI Pipeline
+
+Defined in .github/workflows/ci.yml. Two sequential jobs on every push and PR:
+
+    lint  →  test
+
+lint: ruff check + ruff format --check across web/ and tests/
+test: pytest -v (only runs if lint passes)
+
 
 ## Postman
 
@@ -78,8 +100,9 @@ All dependencies are exact-pinned in web/requirements.txt for reproducible build
 Upgrade procedure:
 1. Update the version in web/requirements.txt.
 2. Reinstall: pip install -r web/requirements.txt
-3. Run tests: cd web && pytest
-4. Commit the updated requirements.txt.
+3. Run tests: pytest -v
+4. Run lint: ./scripts/lint.sh
+5. Commit the updated requirements.txt.
 
 <!-- graph-tools-start -->
 
