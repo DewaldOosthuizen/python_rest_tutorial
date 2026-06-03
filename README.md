@@ -1,74 +1,90 @@
 # python_rest_tutorial
 
-[![Tests](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/test.yml/badge.svg)](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/test.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/53014a434fb340f2afde9853e2314a8a)](https://www.codacy.com/gh/DewaldOosthuizen/python_rest_tutorial/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DewaldOosthuizen/python_rest_tutorial&amp;utm_campaign=Badge_Grade)
+[![CI](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/ci.yml/badge.svg)](https://github.com/DewaldOosthuizen/python_rest_tutorial/actions/workflows/ci.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/53014a434fb340f2afde9853e2314a8a)](https://www.codacy.com/gh/DewaldOosthuizen/python_rest_tutorial/dashboard?utm_source=github.com&utm_medium=referral&utm_content=DewaldOosthuizen/python_rest_tutorial&utm_campaign=Badge_Grade)
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RVJC5VUM5ZEW8&source=url)
 [![License](http://img.shields.io/badge/Licence-MIT-brightgreen.svg)](LICENSE.md)
 
-This is a comprehensive guide and implementation to help developers learn how to create RESTful APIs using Python, Flask, Docker and MongoDB. It demonstrates best practices for 
-building scalable and efficient APIs, leveraging Python's capabilities alongside Docker for containerization. The repository serves as an educational 
-resource for both beginners and experienced developers looking to refine their skills in REST API development.
+A comprehensive guide and implementation to help developers learn how to create RESTful APIs
+using Python, Flask, Docker, and MongoDB. It demonstrates best practices for building scalable
+and efficient APIs, leveraging Python's capabilities alongside Docker for containerization.
+The repository serves as an educational resource for both beginners and experienced developers
+looking to refine their skills in REST API development.
 
-Here is an article you can follow to create this project from the beginning:
+Reference article:
 <https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb>
 
 
-## Docker and docker-compose
+## Repository Structure
 
-Inside the root project you can run
-
-```shell
-sudo docker-compose build
+```
+web/                  Python application source (Flask app + Dockerfile)
+web/requirements.txt  Pinned runtime and dev dependencies
+web/tests/            Unit tests for the Flask application
+tests/                Integration / config-level tests
+scripts/lint.sh       Local lint script (mirrors CI exactly)
+docker-compose.yml    Service definitions: app + MongoDB
+.env.example          Environment variable template
 ```
 
-and then run the folowing to start the container and expose the API:
 
-```shell
-sudo docker-compose up
-```
+## Getting Started
 
-Once the container is running, you can access it by opening your browser and typing in localhost:5000/hello. This should
-display a "Hello World!" message.
-
-There are also other endpoints to test with, and can be found in the article mentioned at the top.
-
-## Using postman
-
-When using postman to test your rest endpoints, be sure to add content-type: application/json to your headers.
-
-If you don't want to specify content type in the header then you can use
-request.get_json(force=True) inside your endpoint when fetching the data from the request
-to force the data to be read as JSON.
-
-For reference have a look at <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1>
-
-## Environment Variables
-
-The application is configured via environment variables. Copy the example file to get started:
+### 1. Configure environment variables
 
 ```shell
 cp .env.example .env
 ```
 
-| Variable   | Default                   | Description                                                                      |
-|------------|---------------------------|----------------------------------------------------------------------------------|
-| MONGO_URI  | mongodb://my_db:27017/    | MongoDB connection string. Override with credentials for remote/secured instances.|
-| JWT_SECRET | *(required)*              | Secret key used to sign and verify JWT tokens. Must be a long random string. Never hardcode or commit this value. |
+Edit `.env` and set a strong `JWT_SECRET` before starting the application.
+
+### 2. Build and start the containers
+
+```shell
+sudo docker-compose build
+sudo docker-compose up
+```
+
+### 3. Verify the service
+
+Open <http://localhost:5000/hello> in your browser or run:
+
+```shell
+curl http://localhost:5000/hello
+```
+
+Expected response: `"Hello World!"`
+
+
+## Environment Variables
+
+| Variable   | Default                | Description                                                                 |
+|------------|------------------------|-----------------------------------------------------------------------------|
+| MONGO_URI  | mongodb://my_db:27017/ | MongoDB connection string. Override for remote or authenticated instances.  |
+| JWT_SECRET | *(required)*           | Secret key for signing and verifying JWT tokens. Use a long random string.  |
+
+Never hardcode or commit `JWT_SECRET`.
 
 
 ## Authentication
 
 The API uses JWT (JSON Web Token) bearer authentication.
 
-### 1. Obtain a token — POST /login
+### 1. Register a user — POST /register
 
-Send your credentials once to receive a signed token:
+```shell
+curl -X POST http://localhost:5000/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "yourpassword"}'
+```
+
+### 2. Obtain a token — POST /login
 
 ```shell
 curl -X POST http://localhost:5000/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "alice", "password": "secret"}'
+  -d '{"username": "alice", "password": "yourpassword"}'
 ```
 
 Response (200 OK):
@@ -77,9 +93,9 @@ Response (200 OK):
 {"status": 200, "token": "<signed-jwt>"}
 ```
 
-On invalid credentials the endpoint returns 401 with `{"status": 401, "msg": "Invalid credentials"}`.
+On invalid credentials the endpoint returns 401.
 
-### 2. Call protected endpoints — Authorization: Bearer
+### 3. Call protected endpoints — Authorization: Bearer
 
 Pass the token in the `Authorization` header on every call to `/retrieve` and `/save`:
 
@@ -98,35 +114,90 @@ curl -X POST http://localhost:5000/save \
 Missing, expired, or tampered tokens return 401 Unauthorized.
 
 
-## Running the tests
+## Using Postman
+
+Add `Content-Type: application/json` to your request headers.
+
+If you prefer not to set the content-type header manually, the endpoints use
+`request.get_json(force=True)` which will parse the body as JSON regardless.
+
+See <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1> for context.
+
+
+## Running the Tests
+
+Install dependencies and run the full test suite from the project root:
 
 ```bash
-cd web
-pip install -r requirements.txt
-pytest
+pip install -r web/requirements.txt
+pytest -v
 ```
+
+This runs both `web/tests/` (unit tests) and `tests/` (config and API-contract tests).
+
+
+## Linting
+
+The project uses [Ruff](https://docs.astral.sh/ruff/) for linting and formatting
+(replaces flake8 + isort + black in a single fast tool).
+
+### Run locally (mirrors CI exactly)
+
+```bash
+# Check only
+./scripts/lint.sh
+
+# Auto-fix then check
+./scripts/lint.sh --fix
+```
+
+### Run ruff directly
+
+```bash
+ruff check web/ tests/           # lint
+ruff format --check web/ tests/  # format check
+ruff format web/ tests/          # apply formatting
+```
+
+Ruff is included in `web/requirements.txt` so no separate install is needed
+once the project dependencies are installed.
+
+
+## CI Pipeline
+
+Every push and pull request runs the GitHub Actions CI pipeline:
+
+```
+lint  →  test
+```
+
+- **lint** — `ruff check` + `ruff format --check` across `web/` and `tests/`
+- **test** — `pytest -v` (only runs if lint passes)
+
+The pipeline is defined in `.github/workflows/ci.yml`.
+
 
 ## Dependencies
 
-All runtime and development dependencies are pinned to exact versions in web/requirements.txt
-to ensure reproducible builds and avoid unexpected breakage from upstream changes.
+All runtime and development dependencies are pinned in `web/requirements.txt`
+to ensure reproducible builds across local, CI, and Docker environments.
 
-| Package        | Version        | Role               |
-|----------------|----------------|--------------------|
-| Flask          | 2.2.5          | Web framework      |
-| Werkzeug       | 2.3.7          | WSGI utilities     |
-| flask-restful  | 0.3.10         | REST API helpers   |
-| pymongo        | 4.6.3          | MongoDB driver     |
-| bcrypt         | 4.0.1          | Password hashing   |
-| PyJWT          | >=2.8.0        | JWT authentication |
-| pytest         | 9.0.3          | Test runner (dev)  |
+| Package       | Version  | Role                      |
+|---------------|----------|---------------------------|
+| Flask         | 3.1.3    | Web framework             |
+| Werkzeug      | >=3.0.0  | WSGI utilities            |
+| flask-restful | 0.3.10   | REST resource helpers     |
+| pymongo       | 4.7.2    | MongoDB driver            |
+| bcrypt        | 4.1.3    | Password hashing          |
+| PyJWT         | >=2.8.0  | JWT authentication        |
+| pytest        | 9.0.3    | Test runner (dev)         |
+| pytest-cov    | >=4.1    | Coverage reports (dev)    |
+| ruff          | >=0.5.0  | Linting and formatting (dev) |
 
-Rationale: Floating version specifiers (>=) allow pip to silently pull in
-breaking releases. Exact pins (==) guarantee that every environment — local,
-CI, and Docker — runs the same code.
+### Upgrade procedure
 
-Upgrade procedure:
-1. Update the version number in web/requirements.txt.
-2. Rebuild/reinstall: pip install -r web/requirements.txt
-3. Run the full test suite: cd web && pytest
-4. If all tests pass, commit the updated requirements.txt.
+1. Update the version in `web/requirements.txt`.
+2. Reinstall: `pip install -r web/requirements.txt`
+3. Run the test suite: `pytest -v`
+4. Run the linter: `./scripts/lint.sh`
+5. If all checks pass, commit the updated `requirements.txt`.
