@@ -1,0 +1,22 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# E — pycodestyle errors
+# F — Pyflakes (unused imports, undefined names, etc.)
+# I — isort (import ordering)
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "S101",  # assert is idiomatic in pytest
+    "S105",  # hardcoded test passwords are intentional fixture values
+    "E402",  # sys.modules injection may precede imports in test helpers
+]
+"web/tests/*.py" = [
+    "S101",
+    "S105",
+    "E402",
+]

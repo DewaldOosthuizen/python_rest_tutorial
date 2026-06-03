@@ -1,20 +1,92 @@
+# Environment variables
 .env
 .env.local
 .env.*.local
+
+# Python bytecode
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
+
+# Distribution / packaging
+*.egg
 *.egg-info/
 dist/
 build/
-.vscode/
-.idea/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.whl
+MANIFEST
+
+# Virtual environments
 .venv/
+venv/
+env/
+ENV/
+.virtualenv/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# MyPy / type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Ruff / linting
+.ruff_cache/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# MongoDB data (if mounted locally)
+data/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
 
 # BEGIN workspace-orchestrator
 .hermes_tmp_prompt.txt
