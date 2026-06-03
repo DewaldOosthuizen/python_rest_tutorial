@@ -13,7 +13,7 @@ The repository serves as an educational resource for both beginners and experien
 looking to refine their skills in REST API development.
 
 Reference article:
-<https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb>
+<https://www.dvt.co.za/news-insights/insights/item/355-restful-web-services-using-python-flask-docker-and-mongodb> [Specific to commit sha 87722d939eadaca906fade165829eddb59f906d1] The project has since been updated to use JWT instead of basic auth
 
 
 ## Repository Structure
