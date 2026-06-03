@@ -1,13 +1,15 @@
 # import functools
 import datetime
 import os
-import bcrypt
-import jwt
+from datetime import timezone
 from functools import wraps
 
-from flask import Flask, jsonify, request
+import bcrypt
+import jwt
+from flask import Flask, request
 from flask_restful import Api, Resource
 from pymongo import MongoClient
+
 # print = functools.partial(print, flush=True)
 
 app = Flask(__name__)
@@ -33,18 +35,18 @@ def verify_user(username, password):
     if not user_exist(username):
         return False
 
-    user_hashed_pw = users.find({
-        "Username": username
-    })[0]["Password"]
+    user_hashed_pw = users.find({"Username": username})[0]["Password"]
 
-    return bcrypt.checkpw(password.encode('utf8'), user_hashed_pw)
+    return bcrypt.checkpw(password.encode("utf8"), user_hashed_pw)
 
 
 def get_user_messages(username):
     # get the messages
-    return users.find({
-        "Username": username,
-    })[0]["Messages"]
+    return users.find(
+        {
+            "Username": username,
+        }
+    )[0]["Messages"]
 
 
 def requires_auth(f):
@@ -60,6 +62,7 @@ def requires_auth(f):
         except jwt.PyJWTError:
             return {"status": 401, "msg": "Unauthorized"}, 401
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -75,6 +78,7 @@ class Hello(Resource):
 
     def get(self):
         return "Hello World!"
+
 
 class Register(Resource):
     """
@@ -93,16 +97,13 @@ class Register(Resource):
             return {"status": 400, "msg": "User already exists"}, 400
 
         # encrypt password
-        hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+        hashed_pw = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
 
         # Insert record
-        users.insert_one({
-            "Username": username,
-            "Password": hashed_pw,
-            "Messages": []
-        })
+        users.insert_one({"Username": username, "Password": hashed_pw, "Messages": []})
 
         return {"status": 200, "msg": "Registration successful"}, 200
+
 
 class Login(Resource):
     def post(self):
@@ -122,6 +123,7 @@ class Login(Resource):
         )
         return {"status": 200, "token": token}, 200
 
+
 class Retrieve(Resource):
     """
     This is the Retrieve resource class
@@ -131,6 +133,7 @@ class Retrieve(Resource):
     def post(self):
         messages = get_user_messages(request.username)
         return {"status": 200, "obj": messages}, 200
+
 
 class Save(Resource):
     """
@@ -150,22 +153,16 @@ class Save(Resource):
         messages.append(message)
 
         # save the new user message
-        users.update_one({
-            "Username": username
-        }, {
-            "$set": {
-                "Messages": messages
-            }
-        })
+        users.update_one({"Username": username}, {"$set": {"Messages": messages}})
         return {"status": 200, "msg": "Message has been saved successfully"}, 200
 
 
-api.add_resource(Hello, '/hello')
-api.add_resource(Register, '/register')
-api.add_resource(Login, '/login')
-api.add_resource(Retrieve, '/retrieve')
-api.add_resource(Save, '/save')
+api.add_resource(Hello, "/hello")
+api.add_resource(Register, "/register")
+api.add_resource(Login, "/login")
+api.add_resource(Retrieve, "/retrieve")
+api.add_resource(Save, "/save")
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False, port=5000)
+    app.run(host="0.0.0.0", debug=False, port=5000)

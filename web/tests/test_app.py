@@ -10,18 +10,20 @@ and configure the returned cursor with both count() and __getitem__.
 
 We NEVER use find_one — it is not called anywhere in app.py.
 """
+
 import datetime
 import os
-import bcrypt
-import pytest
-import jwt
+from datetime import timezone
 from unittest.mock import MagicMock, patch
+
+import bcrypt
+import jwt
+import pytest
 
 # Set JWT_SECRET before importing app
 os.environ["JWT_SECRET"] = "testsecret"
 
 from app import app
-
 
 TEST_SECRET = "testsecret"
 
@@ -29,6 +31,7 @@ TEST_SECRET = "testsecret"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_user_cursor(username="alice", password="secret", messages=None):
     hashed = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
@@ -69,6 +72,7 @@ def make_expired_token(username="alice"):
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
@@ -82,6 +86,7 @@ def client():
 # ---------------------------------------------------------------------------
 # Hello
 # ---------------------------------------------------------------------------
+
 
 def test_hello_returns_200(client):
     rv = client.get("/hello")
@@ -98,6 +103,7 @@ def test_hello_returns_hello_world(client):
 # ---------------------------------------------------------------------------
 # Register
 # ---------------------------------------------------------------------------
+
 
 @patch("app.users")
 def test_register_new_user_returns_200(mock_users, client):
@@ -125,6 +131,7 @@ def test_register_missing_body_returns_400(client):
 # ---------------------------------------------------------------------------
 # Login
 # ---------------------------------------------------------------------------
+
 
 @patch("app.users")
 def test_login_valid_credentials_returns_token(mock_users, client):
@@ -160,6 +167,7 @@ def test_login_missing_body_returns_400(client):
 # Retrieve
 # ---------------------------------------------------------------------------
 
+
 @patch("app.users")
 def test_retrieve_no_auth_header_returns_401(mock_users, client):
     rv = client.post("/retrieve")
@@ -194,6 +202,7 @@ def test_retrieve_valid_token_returns_messages(mock_users, client):
 # ---------------------------------------------------------------------------
 # Save
 # ---------------------------------------------------------------------------
+
 
 @patch("app.users")
 def test_save_no_auth_header_returns_401(mock_users, client):
@@ -235,6 +244,7 @@ def test_save_missing_message_returns_400(mock_users, client):
 # ---------------------------------------------------------------------------
 # insert_one / update_one API migration (issue #6)
 # ---------------------------------------------------------------------------
+
 
 @patch("app.users")
 def test_register_calls_insert_one(mock_users, client):
