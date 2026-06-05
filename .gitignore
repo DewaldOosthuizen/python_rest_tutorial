@@ -64,6 +64,8 @@ dmypy.json
 .project
 .classpath
 .settings/
+.lh
+.history
 
 # macOS
 .DS_Store
