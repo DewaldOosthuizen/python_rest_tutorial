@@ -114,6 +114,28 @@ curl -X POST http://localhost:5000/save \
 Missing, expired, or tampered tokens return 401 Unauthorized.
 
 
+## Rate Limiting
+
+To mitigate brute-force credential guessing and account-creation abuse
+(OWASP API4:2023 — Unrestricted Resource Consumption), `/login` and
+`/register` are throttled per client IP using
+[Flask-Limiter](https://flask-limiter.readthedocs.io/):
+
+| Endpoint    | Limit          |
+|-------------|----------------|
+| `/login`    | 10 per minute  |
+| `/register` | 5 per hour     |
+
+Requests beyond the threshold receive an HTTP `429 Too Many Requests`
+response. Other endpoints (`/hello`, `/retrieve`, `/save`) are unaffected —
+there is no global default limit.
+
+The limiter's counters are backed by the `RATELIMIT_STORAGE_URL` environment
+variable, which defaults to `memory://` for local/single-process use. For
+production or multi-worker deployments, point it at a shared store such as
+Redis, e.g. `RATELIMIT_STORAGE_URL=redis://redis:6379`.
+
+
 ## Using Postman
 
 Add `Content-Type: application/json` to your request headers.
