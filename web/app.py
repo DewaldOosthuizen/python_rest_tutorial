@@ -7,6 +7,8 @@ from functools import wraps
 import bcrypt
 import jwt
 from flask import Flask, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_restful import Api, Resource
 from pymongo import MongoClient
 
@@ -14,6 +16,13 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 api = Api(app)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri=os.environ.get("RATELIMIT_STORAGE_URL", "memory://"),
+)
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://my_db:27017/")
 client = MongoClient(MONGO_URI)
@@ -85,6 +94,8 @@ class Register(Resource):
     This is the Register resource class
     """
 
+    decorators = [limiter.limit("5 per hour")]
+
     def post(self):
         data = request.get_json(silent=True, force=True)
         if not data:
@@ -106,6 +117,8 @@ class Register(Resource):
 
 
 class Login(Resource):
+    decorators = [limiter.limit("10 per minute")]
+
     def post(self):
         data = request.get_json(silent=True, force=True)
         if not data:
