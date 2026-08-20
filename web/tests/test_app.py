@@ -265,3 +265,53 @@ def test_save_calls_update_one(mock_users, client):
         headers={"Authorization": "Bearer " + token},
     )
     mock_users.update_one.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting (issue #29)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def rate_limited_client():
+    """A client with an isolated, in-memory limiter storage per test."""
+    app.config["TESTING"] = True
+    app.config["PROPAGATE_EXCEPTIONS"] = False
+    from app import limiter
+
+    limiter.enabled = True
+    limiter.reset()
+    with app.test_client() as c:
+        yield c
+    limiter.reset()
+
+
+@patch("app.users")
+def test_login_rate_limit_returns_429_after_threshold(mock_users, rate_limited_client):
+    mock_users.find.return_value = make_empty_cursor()
+    responses = []
+    for _ in range(11):
+        rv = rate_limited_client.post("/login", json={"username": "ghost", "password": "x"})
+        responses.append(rv.status_code)
+
+    # Requests within the limit still succeed with their normal status codes.
+    assert responses[:10] == [401] * 10
+    # The 11th request within the window is throttled.
+    assert responses[10] == 429
+
+
+@patch("app.users")
+def test_register_rate_limit_returns_429_after_threshold(mock_users, rate_limited_client):
+    mock_users.find.return_value = make_empty_cursor()
+    responses = []
+    for i in range(6):
+        rv = rate_limited_client.post(
+            "/register",
+            json={"username": f"user{i}", "password": "secret"},
+        )
+        responses.append(rv.status_code)
+
+    # Requests within the limit still succeed with their normal status codes.
+    assert responses[:5] == [200] * 5
+    # The 6th request within the window is throttled.
+    assert responses[5] == 429
