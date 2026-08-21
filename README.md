@@ -20,7 +20,8 @@ Reference article:
 
 ```
 web/                  Python application source (Flask app + Dockerfile)
-web/requirements.txt  Pinned runtime and dev dependencies
+web/requirements.txt  Pinned runtime dependencies
+web/requirements-dev.txt  Dev/test dependencies (pytest, pytest-cov, ruff)
 web/tests/            Unit tests for the Flask application
 tests/                Integration / config-level tests
 scripts/lint.sh       Local lint script (mirrors CI exactly)
@@ -96,17 +97,18 @@ Response (200 OK):
 On invalid credentials the endpoint returns 401.
 
 ### 3. Call protected endpoints — Authorization: Bearer
+***
 
 Pass the token in the `Authorization` header on every call to `/retrieve` and `/save`:
 
 ```shell
 # Retrieve messages
 curl -X POST http://localhost:5000/retrieve \
-  -H "Authorization: Bearer <token>"
+  -H "Authorization: Bearer ***"
 
 # Save a message
 curl -X POST http://localhost:5000/save \
-  -H "Authorization: Bearer <token>" \
+  -H "Authorization: Bearer ***" \
   -H "Content-Type: application/json" \
   -d '{"message": "Hello!"}'
 ```
@@ -151,7 +153,7 @@ See <https://github.com/DewaldOosthuizen/python_rest_tutorial/issues/1> for cont
 Install dependencies and run the full test suite from the project root:
 
 ```bash
-pip install -r web/requirements.txt
+pip install -r web/requirements-dev.txt
 pytest -v
 ```
 
@@ -181,8 +183,8 @@ ruff format --check web/ tests/  # format check
 ruff format web/ tests/          # apply formatting
 ```
 
-Ruff is included in `web/requirements.txt` so no separate install is needed
-once the project dependencies are installed.
+Ruff is included in `web/requirements-dev.txt` so no separate install is needed
+once the dev dependencies are installed.
 
 
 ## CI Pipeline
@@ -201,8 +203,12 @@ The pipeline is defined in `.github/workflows/ci.yml`.
 
 ## Dependencies
 
-All runtime and development dependencies are pinned in `web/requirements.txt`
-to ensure reproducible builds across local, CI, and Docker environments.
+All runtime dependencies are pinned in `web/requirements.txt` and
+development/test dependencies are pinned in `web/requirements-dev.txt`
+(which itself pulls in `requirements.txt` via `-r`) to ensure reproducible
+builds across local, CI, and Docker environments.
+
+### Runtime dependencies
 
 | Package       | Version  | Role                      |
 |---------------|----------|---------------------------|
@@ -212,17 +218,25 @@ to ensure reproducible builds across local, CI, and Docker environments.
 | pymongo       | 4.7.2    | MongoDB driver            |
 | bcrypt        | 4.1.3    | Password hashing          |
 | PyJWT         | >=2.8.0  | JWT authentication        |
-| pytest        | 9.0.3    | Test runner (dev)         |
-| pytest-cov    | >=4.1    | Coverage reports (dev)    |
-| ruff          | >=0.5.0  | Linting and formatting (dev) |
+| Flask-Limiter | 3.7.0    | Rate limiting             |
+
+### Development dependencies
+
+| Package       | Version  | Role                      |
+|---------------|----------|---------------------------|
+| pytest        | 9.0.3    | Test runner               |
+| pytest-cov    | >=4.1    | Coverage reports          |
+| ruff          | >=0.5.0  | Linting and formatting    |
 
 ### Upgrade procedure
 
-1. Update the version in `web/requirements.txt`.
-2. Reinstall: `pip install -r web/requirements.txt`
-3. Run the test suite: `pytest -v`
-4. Run the linter: `./scripts/lint.sh`
-5. If all checks pass, commit the updated `requirements.txt`.
+1. For runtime deps: update the version in `web/requirements.txt`.
+2. For test/lint tooling: update the version in `web/requirements-dev.txt`.
+3. Reinstall: `pip install -r web/requirements-dev.txt`
+4. Run the test suite: `pytest -v`
+5. Run the linter: `./scripts/lint.sh`
+6. If all checks pass, commit the updated requirement file(s).
+
 
 ## Contributing
 
