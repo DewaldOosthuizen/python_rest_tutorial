@@ -189,8 +189,12 @@ class Retrieve(Resource):
 
     @requires_auth
     def post(self):
-        messages = get_user_messages(request.username)
-        return {"status": 200, "obj": messages}, 200
+        offset = request.args.get("offset", 0, type=int)
+        limit = request.args.get("limit", 20, type=int)
+        limit = min(limit, 100)
+        all_messages = get_user_messages(request.username)
+        page = all_messages[offset : offset + limit]
+        return {"status": 200, "obj": page, "total": len(all_messages)}, 200
 
 
 class Save(Resource):
