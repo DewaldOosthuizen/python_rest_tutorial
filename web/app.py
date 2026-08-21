@@ -181,11 +181,7 @@ class Save(Resource):
         if not message:
             return {"status": 400, "msg": "message is required"}, 400
         username = request.username
-        messages = get_user_messages(username)
-        messages.append(message)
-
-        # save the new user message
-        users.update_one({"Username": username}, {"$set": {"Messages": messages}})
+        users.update_one({"Username": username}, {"$push": {"Messages": message}})
         return {"status": 200, "msg": "Message has been saved successfully"}, 200
 
 
