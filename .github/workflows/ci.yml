@@ -32,6 +32,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install -r web/requirements.txt
+        run: pip install -r web/requirements-dev.txt
       - name: Run tests
         run: pytest -v
