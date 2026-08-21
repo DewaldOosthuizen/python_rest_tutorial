@@ -152,8 +152,8 @@ def test_register_oversized_password_returns_400(mock_users, client):
     assert "128" in data["msg"]
 
 
-def test_register_non_string_username_returns_400(client):
-    rv = client.post("/register", json={"username": 123, "password": "secret"})
+def test_register_non_string_username_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": 123, "password": "secret"})
     assert rv.status_code == 400
     data = rv.get_json()
     assert data["status"] == 400
@@ -161,8 +161,8 @@ def test_register_non_string_username_returns_400(client):
     assert "string" in data["msg"]
 
 
-def test_register_non_string_password_returns_400(client):
-    rv = client.post("/register", json={"username": "alice", "password": 456})
+def test_register_non_string_password_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": 456})
     assert rv.status_code == 400
     data = rv.get_json()
     assert data["status"] == 400

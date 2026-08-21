@@ -138,6 +138,22 @@ production or multi-worker deployments, point it at a shared store such as
 Redis, e.g. `RATELIMIT_STORAGE_URL=redis://redis:6379`.
 
 
+## Input Validation
+
+To prevent oversized payloads from causing memory pressure or unnecessary
+bcrypt work, the API enforces the following per-field limits. Violations
+return HTTP 400 with a descriptive message.
+
+| Field      | Endpoint(s)        | Max length | Type   |
+|------------|--------------------|------------|--------|
+| username   | /register, /login  | 64 chars   | string |
+| password   | /register, /login  | 128 chars  | string |
+| message    | /save              | 1024 chars | string |
+
+Non-string values (e.g. a JSON number or array) for any of these fields also
+return HTTP 400.
+
+
 ## Using Postman
 
 Add `Content-Type: application/json` to your request headers.
