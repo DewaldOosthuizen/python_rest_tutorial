@@ -41,14 +41,12 @@ def make_user_cursor(username="alice", password="secret", messages=None):
         "Messages": messages or [],
     }
     cursor = MagicMock()
-    cursor.count.return_value = 1
     cursor.__getitem__.return_value = user_doc
     return cursor
 
 
 def make_empty_cursor():
     cursor = MagicMock()
-    cursor.count.return_value = 0
     return cursor
 
 
@@ -107,7 +105,7 @@ def test_hello_returns_hello_world(client):
 
 @patch("app.users")
 def test_register_new_user_returns_200(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     rv = client.post("/register", json={"username": "alice", "password": "secret"})
     assert rv.status_code == 200
     data = rv.get_json()
@@ -116,7 +114,7 @@ def test_register_new_user_returns_200(mock_users, client):
 
 @patch("app.users")
 def test_register_existing_user_returns_invalid(mock_users, client):
-    mock_users.find.return_value = make_user_cursor()
+    mock_users.count_documents.return_value = 1
     rv = client.post("/register", json={"username": "alice", "password": "secret"})
     assert rv.status_code == 400
     data = rv.get_json()
@@ -130,7 +128,7 @@ def test_register_missing_body_returns_400(client):
 
 @patch("app.users")
 def test_register_oversized_username_returns_400(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     oversized = "a" * 65
     rv = client.post("/register", json={"username": oversized, "password": "secret"})
     assert rv.status_code == 400
@@ -142,7 +140,7 @@ def test_register_oversized_username_returns_400(mock_users, client):
 
 @patch("app.users")
 def test_register_oversized_password_returns_400(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     oversized = "a" * 129
     rv = client.post("/register", json={"username": "alice", "password": oversized})
     assert rv.status_code == 400
@@ -177,6 +175,7 @@ def test_register_non_string_password_returns_400(rate_limited_client):
 
 @patch("app.users")
 def test_login_valid_credentials_returns_token(mock_users, client):
+    mock_users.count_documents.return_value = 1
     mock_users.find.return_value = make_user_cursor(username="alice", password="secret")
     rv = client.post("/login", json={"username": "alice", "password": "secret"})
     assert rv.status_code == 200
@@ -187,6 +186,7 @@ def test_login_valid_credentials_returns_token(mock_users, client):
 
 @patch("app.users")
 def test_login_wrong_password_returns_401(mock_users, client):
+    mock_users.count_documents.return_value = 1
     mock_users.find.return_value = make_user_cursor(username="alice", password="correct")
     rv = client.post("/login", json={"username": "alice", "password": "wrong"})
     assert rv.status_code == 401
@@ -195,7 +195,7 @@ def test_login_wrong_password_returns_401(mock_users, client):
 
 @patch("app.users")
 def test_login_unknown_user_returns_401(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     rv = client.post("/login", json={"username": "ghost", "password": "x"})
     assert rv.status_code == 401
 
@@ -207,7 +207,7 @@ def test_login_missing_body_returns_400(client):
 
 @patch("app.users")
 def test_login_oversized_username_returns_400(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     oversized = "a" * 65
     rv = client.post("/login", json={"username": oversized, "password": "secret"})
     assert rv.status_code == 400
@@ -219,7 +219,7 @@ def test_login_oversized_username_returns_400(mock_users, client):
 
 @patch("app.users")
 def test_login_oversized_password_returns_400(mock_users, client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     oversized = "a" * 129
     rv = client.post("/login", json={"username": "alice", "password": oversized})
     assert rv.status_code == 400
@@ -274,6 +274,7 @@ def test_retrieve_tampered_token_returns_401(mock_users, client):
 
 @patch("app.users")
 def test_retrieve_valid_token_returns_messages(mock_users, client):
+    mock_users.count_documents.return_value = 1
     mock_users.find.return_value = make_user_cursor(username="alice", messages=["hello"])
     token = make_valid_token(username="alice")
     rv = client.post("/retrieve", headers={"Authorization": f"Bearer {token}"})
@@ -363,7 +364,7 @@ def test_save_non_string_message_returns_400(mock_users, client):
 @patch("app.users")
 def test_register_calls_insert_one(mock_users, client):
     """Register must use insert_one (not the deprecated insert)."""
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     client.post("/register", json={"username": "bob", "password": "pass"})
     mock_users.insert_one.assert_called_once()
 
@@ -406,7 +407,7 @@ def rate_limited_client():
 
 @patch("app.users")
 def test_login_rate_limit_returns_429_after_threshold(mock_users, rate_limited_client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     responses = []
     for _ in range(11):
         rv = rate_limited_client.post("/login", json={"username": "ghost", "password": "x"})
@@ -420,7 +421,7 @@ def test_login_rate_limit_returns_429_after_threshold(mock_users, rate_limited_c
 
 @patch("app.users")
 def test_register_rate_limit_returns_429_after_threshold(mock_users, rate_limited_client):
-    mock_users.find.return_value = make_empty_cursor()
+    mock_users.count_documents.return_value = 0
     responses = []
     for i in range(6):
         rv = rate_limited_client.post(

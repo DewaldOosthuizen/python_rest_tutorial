@@ -65,7 +65,7 @@ def _require_string(value, max_len, field):
 
 
 def user_exist(username):
-    return users.find({"Username": username}).count() > 0
+    return users.count_documents({"Username": username}) > 0
 
 
 def verify_user(username, password):
