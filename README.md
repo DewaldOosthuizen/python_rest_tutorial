@@ -38,7 +38,11 @@ docker-compose.yml    Service definitions: app + MongoDB
 cp .env.example .env
 ```
 
-Edit `.env` and set a strong `JWT_SECRET` before starting the application.
+Edit `.env` and set a strong `JWT_SECRET`. Also set strong values for
+`MONGO_USER` and `MONGO_PASSWORD` — the defaults in `.env.example` are
+not suitable for production. The `MONGO_URI` value is automatically
+assembled from `MONGO_USER` and `MONGO_PASSWORD` by docker-compose at
+container startup.
 
 ### 2. Build and start the containers
 
@@ -62,8 +66,10 @@ Expected response: `"Hello World!"`
 
 | Variable   | Default                | Description                                                                 |
 |------------|------------------------|-----------------------------------------------------------------------------|
-| MONGO_URI  | mongodb://my_db:27017/ | MongoDB connection string. Override for remote or authenticated instances.  |
-| JWT_SECRET | *(required)*           | Secret key for signing and verifying JWT tokens. Use a long random string.  |
+| MONGO_USER          | admin                  | MongoDB root username. Used by docker-compose to authenticate the my_db service and to build MONGO_URI. Set to a strong value for production. |
+| MONGO_PASSWORD      | changeme               | MongoDB root password. Used by docker-compose to authenticate the my_db service and to build MONGO_URI. Set to a strong value for production. |
+| MONGO_URI           | mongodb://my_db:27017/ | MongoDB connection string. Automatically assembled by docker-compose from MONGO_USER and MONGO_PASSWORD; override only for remote or externally-managed MongoDB instances. |
+| JWT_SECRET          | *(required)*           | Secret key for signing and verifying JWT tokens. Use a long random string. |
 
 Never hardcode or commit `JWT_SECRET`.
 
