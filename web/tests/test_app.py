@@ -284,6 +284,98 @@ def test_retrieve_valid_token_returns_messages(mock_users, client):
     assert "hello" in data["obj"]
 
 
+@patch("app.users")
+def test_retrieve_default_pagination_returns_first_20_with_total(mock_users, client):
+    messages = [f"msg-{i}" for i in range(50)]
+    mock_users.count_documents.return_value = 1
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/retrieve", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
+    assert data["total"] == 50
+    assert len(data["obj"]) == 20
+    assert data["obj"] == messages[:20]
+
+
+@patch("app.users")
+def test_retrieve_custom_limit_returns_requested_number(mock_users, client):
+    messages = [f"msg-{i}" for i in range(20)]
+    mock_users.count_documents.return_value = 1
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/retrieve",
+        headers={"Authorization": f"Bearer {token}"},
+        query_string="limit=5",
+    )
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
+    assert data["total"] == 20
+    assert len(data["obj"]) == 5
+    assert data["obj"] == messages[:5]
+
+
+@patch("app.users")
+def test_retrieve_custom_offset_skips_correct_messages(mock_users, client):
+    messages = [f"msg-{i}" for i in range(20)]
+    mock_users.count_documents.return_value = 1
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/retrieve",
+        headers={"Authorization": f"Bearer {token}"},
+        query_string="offset=5&limit=5",
+    )
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
+    assert data["total"] == 20
+    assert len(data["obj"]) == 5
+    assert data["obj"] == messages[5:10]
+
+
+@patch("app.users")
+def test_retrieve_offset_beyond_collection_returns_empty_page(mock_users, client):
+    messages = [f"msg-{i}" for i in range(10)]
+    mock_users.count_documents.return_value = 1
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/retrieve",
+        headers={"Authorization": f"Bearer {token}"},
+        query_string="offset=20&limit=5",
+    )
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
+    assert data["total"] == 10
+    assert data["obj"] == []
+
+
+@patch("app.users")
+def test_retrieve_limit_capped_at_100(mock_users, client):
+    messages = [f"msg-{i}" for i in range(150)]
+    mock_users.count_documents.return_value = 1
+    mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/retrieve",
+        headers={"Authorization": f"Bearer {token}"},
+        query_string="limit=200",
+    )
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
+    assert data["total"] == 150
+    assert len(data["obj"]) == 100
+    assert data["obj"] == messages[:100]
+
+
 # ---------------------------------------------------------------------------
 # Save
 # ---------------------------------------------------------------------------
