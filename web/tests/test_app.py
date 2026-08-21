@@ -315,3 +315,26 @@ def test_register_rate_limit_returns_429_after_threshold(mock_users, rate_limite
     assert responses[:5] == [200] * 5
     # The 6th request within the window is throttled.
     assert responses[5] == 429
+
+
+# ---------------------------------------------------------------------------
+# Global error handlers
+# ---------------------------------------------------------------------------
+
+
+def test_404_returns_json_for_nonexistent_route(client):
+    rv = client.get("/nonexistent")
+    assert rv.status_code == 404
+    assert rv.headers["Content-Type"] == "application/json"
+    data = rv.get_json()
+    assert data["status"] == 404
+    assert data["msg"] == "Not found"
+
+
+def test_405_returns_json_for_wrong_method_on_existing_route(client):
+    rv = client.get("/register")
+    assert rv.status_code == 405
+    assert rv.headers["Content-Type"] == "application/json"
+    data = rv.get_json()
+    assert data["status"] == 405
+    assert data["msg"] == "Method not allowed"
