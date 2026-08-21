@@ -219,7 +219,6 @@ def test_save_expired_token_returns_401(mock_users, client):
 
 @patch("app.users")
 def test_save_valid_token_saves_and_returns_200(mock_users, client):
-    mock_users.find.return_value = make_user_cursor(username="alice", messages=[])
     token = make_valid_token(username="alice")
     rv = client.post(
         "/save",
@@ -257,7 +256,6 @@ def test_register_calls_insert_one(mock_users, client):
 @patch("app.users")
 def test_save_calls_update_one(mock_users, client):
     """Save must use update_one (not the deprecated update)."""
-    mock_users.find.return_value = make_user_cursor(username="alice", messages=[])
     token = make_valid_token(username="alice")
     client.post(
         "/save",
@@ -265,6 +263,11 @@ def test_save_calls_update_one(mock_users, client):
         headers={"Authorization": "Bearer " + token},
     )
     mock_users.update_one.assert_called_once()
+    # Verify the new $push operator is used, not $set.
+    call_args = mock_users.update_one.call_args
+    assert call_args[0][0] == {"Username": "alice"}
+    assert "$push" in call_args[0][1]
+    assert call_args[0][1]["$push"]["Messages"] == "hi"
 
 
 # ---------------------------------------------------------------------------
