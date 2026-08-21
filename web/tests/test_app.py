@@ -290,9 +290,7 @@ def test_retrieve_default_pagination_returns_first_20_with_total(mock_users, cli
     mock_users.count_documents.return_value = 1
     mock_users.find.return_value = make_user_cursor(username="alice", messages=messages)
     token = make_valid_token(username="alice")
-    rv = client.post(
-        "/retrieve", headers={"Authorization": f"Bearer {token}"}
-    )
+    rv = client.post("/retrieve", headers={"Authorization": f"Bearer {token}"})
     assert rv.status_code == 200
     data = rv.get_json()
     assert data["status"] == 200

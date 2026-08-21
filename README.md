@@ -108,8 +108,12 @@ On invalid credentials the endpoint returns 401.
 Pass the token in the `Authorization` header on every call to `/retrieve` and `/save`:
 
 ```shell
-# Retrieve messages
+# Retrieve messages (default: first 20, total count included)
 curl -X POST http://localhost:5000/retrieve \
+  -H "Authorization: Bearer ***"
+
+# Retrieve messages with pagination — offset and limit are optional
+curl -X POST "http://localhost:5000/retrieve?offset=20&limit=10" \
   -H "Authorization: Bearer ***"
 
 # Save a message
@@ -117,6 +121,19 @@ curl -X POST http://localhost:5000/save \
   -H "Authorization: Bearer ***" \
   -H "Content-Type: application/json" \
   -d '{"message": "Hello!"}'
+```
+
+The `/retrieve` endpoint supports two optional query parameters:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `offset`  | `0`     | Zero-based index of the first message to return. |
+| `limit`   | `20`    | Maximum number of messages to return. Capped at **100** server-side. |
+
+The response includes a `total` field with the full message count for the authenticated user, allowing clients to paginate through the entire collection:
+
+```json
+{"status": 200, "obj": ["msg-0", "msg-1"], "total": 50}
 ```
 
 Missing, expired, or tampered tokens return 401 Unauthorized.
