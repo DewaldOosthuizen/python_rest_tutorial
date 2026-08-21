@@ -128,6 +128,48 @@ def test_register_missing_body_returns_400(client):
     assert rv.status_code == 400
 
 
+@patch("app.users")
+def test_register_oversized_username_returns_400(mock_users, client):
+    mock_users.find.return_value = make_empty_cursor()
+    oversized = "a" * 65
+    rv = client.post("/register", json={"username": oversized, "password": "secret"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "username" in data["msg"]
+    assert "64" in data["msg"]
+
+
+@patch("app.users")
+def test_register_oversized_password_returns_400(mock_users, client):
+    mock_users.find.return_value = make_empty_cursor()
+    oversized = "a" * 129
+    rv = client.post("/register", json={"username": "alice", "password": oversized})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password" in data["msg"]
+    assert "128" in data["msg"]
+
+
+def test_register_non_string_username_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": 123, "password": "secret"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "username" in data["msg"]
+    assert "string" in data["msg"]
+
+
+def test_register_non_string_password_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": 456})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password" in data["msg"]
+    assert "string" in data["msg"]
+
+
 # ---------------------------------------------------------------------------
 # Login
 # ---------------------------------------------------------------------------
@@ -161,6 +203,48 @@ def test_login_unknown_user_returns_401(mock_users, client):
 def test_login_missing_body_returns_400(client):
     rv = client.post("/login", json={})
     assert rv.status_code == 400
+
+
+@patch("app.users")
+def test_login_oversized_username_returns_400(mock_users, client):
+    mock_users.find.return_value = make_empty_cursor()
+    oversized = "a" * 65
+    rv = client.post("/login", json={"username": oversized, "password": "secret"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "username" in data["msg"]
+    assert "64" in data["msg"]
+
+
+@patch("app.users")
+def test_login_oversized_password_returns_400(mock_users, client):
+    mock_users.find.return_value = make_empty_cursor()
+    oversized = "a" * 129
+    rv = client.post("/login", json={"username": "alice", "password": oversized})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password" in data["msg"]
+    assert "128" in data["msg"]
+
+
+def test_login_non_string_username_returns_400(client):
+    rv = client.post("/login", json={"username": 123, "password": "secret"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "username" in data["msg"]
+    assert "string" in data["msg"]
+
+
+def test_login_non_string_password_returns_400(client):
+    rv = client.post("/login", json={"username": "alice", "password": 456})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password" in data["msg"]
+    assert "string" in data["msg"]
 
 
 # ---------------------------------------------------------------------------
@@ -238,6 +322,37 @@ def test_save_missing_message_returns_400(mock_users, client):
         headers={"Authorization": "Bearer " + token},
     )
     assert rv.status_code == 400
+
+
+@patch("app.users")
+def test_save_oversized_message_returns_400(mock_users, client):
+    token = make_valid_token(username="alice")
+    oversized = "a" * 1025
+    rv = client.post(
+        "/save",
+        json={"message": oversized},
+        headers={"Authorization": "Bearer " + token},
+    )
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "message" in data["msg"]
+    assert "1024" in data["msg"]
+
+
+@patch("app.users")
+def test_save_non_string_message_returns_400(mock_users, client):
+    token = make_valid_token(username="alice")
+    rv = client.post(
+        "/save",
+        json={"message": [1, 2, 3]},
+        headers={"Authorization": "Bearer " + token},
+    )
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "message" in data["msg"]
+    assert "string" in data["msg"]
 
 
 # ---------------------------------------------------------------------------

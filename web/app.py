@@ -55,6 +55,15 @@ HELPER FUNCTIONS
 """
 
 
+def _require_string(value, max_len, field):
+    """Validate that *value* is a string and does not exceed *max_len*."""
+    if not isinstance(value, str):
+        return f"{field} must be a string"
+    if len(value) > max_len:
+        return f"{field} exceeds maximum length of {max_len}"
+    return None
+
+
 def user_exist(username):
     return users.find({"Username": username}).count() > 0
 
@@ -99,6 +108,11 @@ RESOURCES
 """
 
 
+MAX_USERNAME_LEN = 64
+MAX_PASSWORD_LEN = 128
+MAX_MESSAGE_LEN = 1024
+
+
 class Hello(Resource):
     """
     This is the Hello resource class
@@ -121,6 +135,12 @@ class Register(Resource):
             return {"status": 400, "msg": "Request body must be valid JSON"}, 400
         username = data.get("username")
         password = data.get("password")
+        err = _require_string(username, MAX_USERNAME_LEN, "username")
+        if err:
+            return {"status": 400, "msg": err}, 400
+        err = _require_string(password, MAX_PASSWORD_LEN, "password")
+        if err:
+            return {"status": 400, "msg": err}, 400
         if not username or not password:
             return {"status": 400, "msg": "username and password are required"}, 400
         if user_exist(username):
@@ -144,6 +164,12 @@ class Login(Resource):
             return {"status": 400, "msg": "Request body must be valid JSON"}, 400
         username = data.get("username")
         password = data.get("password")
+        err = _require_string(username, MAX_USERNAME_LEN, "username")
+        if err:
+            return {"status": 400, "msg": err}, 400
+        err = _require_string(password, MAX_PASSWORD_LEN, "password")
+        if err:
+            return {"status": 400, "msg": err}, 400
         if not username or not password:
             return {"status": 400, "msg": "username and password are required"}, 400
         if not verify_user(username, password):
@@ -178,6 +204,9 @@ class Save(Resource):
         if not data:
             return {"status": 400, "msg": "Request body must be valid JSON"}, 400
         message = data.get("message")
+        err = _require_string(message, MAX_MESSAGE_LEN, "message")
+        if err:
+            return {"status": 400, "msg": err}, 400
         if not message:
             return {"status": 400, "msg": "message is required"}, 400
         username = request.username
