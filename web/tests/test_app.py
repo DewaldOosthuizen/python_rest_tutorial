@@ -200,7 +200,9 @@ def test_register_password_missing_digit_returns_400(rate_limited_client):
     assert "password must contain at least one digit" in data["msg"]
 
 
-def test_register_strong_password_returns_200(rate_limited_client):
+@patch("app.users")
+def test_register_strong_password_returns_200(mock_users, rate_limited_client):
+    mock_users.count_documents.return_value = 0
     rv = rate_limited_client.post("/register", json={"username": "alice", "password": "Str0ngPwd"})
     assert rv.status_code == 200
     data = rv.get_json()
@@ -494,7 +496,7 @@ def test_save_non_string_message_returns_400(mock_users, client):
 def test_register_calls_insert_one(mock_users, client):
     """Register must use insert_one (not the deprecated insert)."""
     mock_users.count_documents.return_value = 0
-    client.post("/register", json={"username": "bob", "password": "pass"})
+    client.post("/register", json={"username": "bob", "password": "Str0ngPwd"})
     mock_users.insert_one.assert_called_once()
 
 

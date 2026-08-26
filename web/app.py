@@ -1,6 +1,7 @@
 # import functools
 import datetime
 import os
+import re
 from datetime import timezone
 from functools import wraps
 
@@ -61,6 +62,22 @@ def _require_string(value, max_len, field):
         return f"{field} must be a string"
     if len(value) > max_len:
         return f"{field} exceeds maximum length of {max_len}"
+    return None
+
+
+MIN_PASSWORD_LENGTH = 8
+
+
+def _validate_password_strength(password):
+    """Return an error message string if *password* is too weak, or None."""
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return f"password must be at least {MIN_PASSWORD_LENGTH} characters"
+    if not re.search(r"[A-Z]", password):
+        return "password must contain at least one uppercase letter"
+    if not re.search(r"[a-z]", password):
+        return "password must contain at least one lowercase letter"
+    if not re.search(r"[0-9]", password):
+        return "password must contain at least one digit"
     return None
 
 
@@ -139,6 +156,9 @@ class Register(Resource):
         if err:
             return {"status": 400, "msg": err}, 400
         err = _require_string(password, MAX_PASSWORD_LEN, "password")
+        if err:
+            return {"status": 400, "msg": err}, 400
+        err = _validate_password_strength(password)
         if err:
             return {"status": 400, "msg": err}, 400
         if not username or not password:
