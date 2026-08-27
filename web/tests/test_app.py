@@ -106,7 +106,7 @@ def test_hello_returns_hello_world(client):
 @patch("app.users")
 def test_register_new_user_returns_200(mock_users, client):
     mock_users.count_documents.return_value = 0
-    rv = client.post("/register", json={"username": "alice", "password": "secret"})
+    rv = client.post("/register", json={"username": "alice", "password": "Str0ngPwd"})
     assert rv.status_code == 200
     data = rv.get_json()
     assert data["status"] == 200
@@ -115,7 +115,7 @@ def test_register_new_user_returns_200(mock_users, client):
 @patch("app.users")
 def test_register_existing_user_returns_invalid(mock_users, client):
     mock_users.count_documents.return_value = 1
-    rv = client.post("/register", json={"username": "alice", "password": "secret"})
+    rv = client.post("/register", json={"username": "alice", "password": "Str0ngPwd"})
     assert rv.status_code == 400
     data = rv.get_json()
     assert data["status"] == 400
@@ -130,7 +130,7 @@ def test_register_missing_body_returns_400(client):
 def test_register_oversized_username_returns_400(mock_users, client):
     mock_users.count_documents.return_value = 0
     oversized = "a" * 65
-    rv = client.post("/register", json={"username": oversized, "password": "secret"})
+    rv = client.post("/register", json={"username": oversized, "password": "Str0ngPwd"})
     assert rv.status_code == 400
     data = rv.get_json()
     assert data["status"] == 400
@@ -151,7 +151,7 @@ def test_register_oversized_password_returns_400(mock_users, client):
 
 
 def test_register_non_string_username_returns_400(rate_limited_client):
-    rv = rate_limited_client.post("/register", json={"username": 123, "password": "secret"})
+    rv = rate_limited_client.post("/register", json={"username": 123, "password": "Str0ngPwd"})
     assert rv.status_code == 400
     data = rv.get_json()
     assert data["status"] == 400
@@ -166,6 +166,47 @@ def test_register_non_string_password_returns_400(rate_limited_client):
     assert data["status"] == 400
     assert "password" in data["msg"]
     assert "string" in data["msg"]
+
+
+def test_register_short_password_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": "Ab1"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password must be at least 8 characters" in data["msg"]
+
+
+def test_register_password_missing_uppercase_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": "str0ngpwd"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password must contain at least one uppercase letter" in data["msg"]
+
+
+def test_register_password_missing_lowercase_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": "STR0NGPWD"})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password must contain at least one lowercase letter" in data["msg"]
+
+
+def test_register_password_missing_digit_returns_400(rate_limited_client):
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": "Str0ngPwd".replace("0", "")})
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data["status"] == 400
+    assert "password must contain at least one digit" in data["msg"]
+
+
+@patch("app.users")
+def test_register_strong_password_returns_200(mock_users, rate_limited_client):
+    mock_users.count_documents.return_value = 0
+    rv = rate_limited_client.post("/register", json={"username": "alice", "password": "Str0ngPwd"})
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["status"] == 200
 
 
 # ---------------------------------------------------------------------------
@@ -455,7 +496,7 @@ def test_save_non_string_message_returns_400(mock_users, client):
 def test_register_calls_insert_one(mock_users, client):
     """Register must use insert_one (not the deprecated insert)."""
     mock_users.count_documents.return_value = 0
-    client.post("/register", json={"username": "bob", "password": "pass"})
+    client.post("/register", json={"username": "bob", "password": "Str0ngPwd"})
     mock_users.insert_one.assert_called_once()
 
 
@@ -516,7 +557,7 @@ def test_register_rate_limit_returns_429_after_threshold(mock_users, rate_limite
     for i in range(6):
         rv = rate_limited_client.post(
             "/register",
-            json={"username": f"user{i}", "password": "secret"},
+            json={"username": f"user{i}", "password": "Str0ngPwd"},
         )
         responses.append(rv.status_code)
 
