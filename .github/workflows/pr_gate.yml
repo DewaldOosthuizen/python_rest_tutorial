@@ -1,10 +1,15 @@
-name: CI
+name: PR Gate
+# Fast-feedback gate for pull requests targeting main.
+# Runs lint -> test on every PR. Does not run on push to main; that is
+# handled by release.yml (which re-validates the exact commit being tagged).
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
     branches: ["main"]
+
+concurrency:
+  group: pr-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   lint:

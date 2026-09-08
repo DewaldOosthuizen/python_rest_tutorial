@@ -1,0 +1,145 @@
+name: Release
+# CalVer rolling release for this educational demo repo.
+#
+# This is a Docker-composed tutorial API with no distributable package
+# (no setup.py/pyproject version field, no build artifact to ship). A
+# "release" here is a CalVer git tag + GitHub Release marking a stable,
+# tested snapshot of the tutorial source for reference purposes — there
+# is intentionally NO build/artifact/upload step, since there is nothing
+# beyond the source tree for consumers to download or deploy.
+#
+# Pipeline: lint -> test (re-validates the exact commit being released,
+# duplicated from pr_gate.yml on purpose) -> tag + GitHub Release.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install "ruff>=0.5.0"
+      - name: ruff check
+        run: ruff check web/ tests/
+      - name: ruff format check
+        run: ruff format --check web/ tests/
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r web/requirements-dev.txt
+      - name: Run tests
+        run: pytest -v
+
+  version-tag-release:
+    name: Tag & Release
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine if release should be skipped
+        id: skip_check
+        run: |
+          git fetch --tags --force origin
+          LAST_TAG=$(git tag -l --sort=-version:refname | grep -E '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$' | head -n1)
+          if [ -z "$LAST_TAG" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "No prior CalVer tag found; proceeding."
+            exit 0
+          fi
+          TAG_SHA=$(git rev-list -n 1 "$LAST_TAG")
+          HEAD_SHA=$(git rev-parse HEAD)
+          if [ "$TAG_SHA" = "$HEAD_SHA" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "HEAD is already tagged as $LAST_TAG; skipping."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute next CalVer tag
+        id: version
+        if: steps.skip_check.outputs.skip != 'true'
+        run: |
+          BASE="$(date -u +%Y).$(date -u +%m).$(date -u +%d)"
+
+          EXISTING=$(git ls-remote --tags origin | sed 's#.*refs/tags/##' | grep -E "^${BASE}(\.[0-9]+)?$" || true)
+
+          if [ -z "$EXISTING" ]; then
+            TAG="$BASE"
+          else
+            MAX=0
+            for t in $EXISTING; do
+              case "$t" in
+                "$BASE") N=0 ;;
+                "$BASE".*) N="${t#"$BASE".}" ;;
+                *) N=0 ;;
+              esac
+              if [ "$N" -gt "$MAX" ]; then
+                MAX="$N"
+              fi
+            done
+            TAG="${BASE}.$((MAX + 1))"
+          fi
+
+          if ! echo "$TAG" | grep -Eq '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$'; then
+            echo "Computed tag '$TAG' does not match CalVer pattern" >&2
+            exit 1
+          fi
+
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+            echo "Tag $TAG already exists on origin" >&2
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Computed release tag: $TAG"
+
+      - name: Warn if HEAD is ahead of origin/main
+        if: steps.skip_check.outputs.skip != 'true'
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::warning::HEAD is not an ancestor of origin/main; tagging a commit not yet on origin/main."
+          fi
+
+      - name: Create and push tag
+        if: steps.skip_check.outputs.skip != 'true'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG (CalVer rolling release)"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        if: steps.skip_check.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          gh release create "$TAG" --generate-notes --target main
