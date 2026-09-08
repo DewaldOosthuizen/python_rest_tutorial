@@ -24,6 +24,46 @@ Stack: Flask 3.1.3, flask-restful 0.3.10, pymongo 4.7.2, bcrypt 4.1.3, PyJWT >=2
     docker-compose.yml    Service definitions: web app + MongoDB
     .env.example          Environment variable template
 
+<!-- graph-tools-start -->
+
+## Code Exploration
+
+### understand-anything
+
+.understand-anything/knowledge-graph.json is present. Use it for layered architecture questions
+(layers, communities, entry points).
+
+    # Launch the interactive dashboard
+    cd ~/.understand-anything-plugin/packages/dashboard
+    GRAPH_DIR=$(pwd) npx vite --host 127.0.0.1
+
+For prose questions load the skill:
+
+    skill: understand-chat
+
+### codegraph
+
+.codegraph/ is present. Use it FIRST for symbol lookup, call tracing,
+or targeted context gathering before opening source files.
+
+    codegraph context "<task description>" -p .   # focused file+symbol context
+    codegraph query "<ClassName or function>" -p . # where is X defined / used
+    codegraph affected <changed-files> -p .        # which tests are affected
+    codegraph sync .                               # after any code change
+
+Decision order for code tasks:
+  1. codegraph context       — which symbols matter?
+  2. understand-anything     — where in the architecture does this live?
+  3. Read raw source         — only the 1-2 files that actually matter.
+
+### graphify
+
+graphify-out/ not yet generated for this repo.
+
+<!-- graph-tools-end -->
+
+---
+
 ## Getting Started
 
 Copy environment config:
@@ -77,15 +117,22 @@ The project uses Ruff (replaces flake8 + isort + black). Config is in pyproject.
     ./scripts/lint.sh            # check only — same as CI
     ./scripts/lint.sh --fix      # auto-fix then check
 
-## CI Pipeline
+## CI / CD
 
-Defined in .github/workflows/ci.yml. Two sequential jobs on every push and PR:
+Documentation for the CI/CD pipeline lives in [docs/index.md](docs/index.md).
+Authoritative rules (verification, review, conventions) live in
+[openspec/config.yaml](openspec/config.yaml).
 
-    lint  →  test
+Two workflows cover all changes:
+- **Pull Request Gate** — `.github/workflows/pr_gate.yml` runs on every PR targeting `main`.
+  It validates lint (ruff check + ruff format --check) then tests (pytest -v).
+- **Release Pipeline** — `.github/workflows/release.yml` runs on every push to `main` and
+  via `workflow_dispatch`. It re-validates lint+tests on the exact commit being released,
+  computes a CalVer tag, creates and pushes the tag, and creates a GitHub Release
+  with auto-generated notes. No build artifacts are attached (this is an educational demo
+  repo without a distributable package).
 
-lint: ruff check + ruff format --check across web/ and tests/
-test: pytest -v (only runs if lint passes)
-
+Local verification mirrors CI: `./scripts/lint.sh && pytest -v`.
 
 ## Postman
 
@@ -103,41 +150,3 @@ Upgrade procedure:
 3. Run tests: pytest -v
 4. Run lint: ./scripts/lint.sh
 5. Commit the updated requirements.txt.
-
-<!-- graph-tools-start -->
-
-## Code Exploration
-
-### understand-anything
-
-.understand-anything/knowledge-graph.json is present.
-Use it for layered architecture questions (layers, communities, entry points).
-
-    # Launch the interactive dashboard
-    cd ~/.understand-anything-plugin/packages/dashboard
-    GRAPH_DIR=$(pwd) npx vite --host 127.0.0.1
-
-For prose questions load the skill:
-
-    skill: understand-chat
-
-### codegraph
-
-.codegraph/ is present. Use it FIRST for symbol lookup, call tracing,
-or targeted context gathering before opening source files.
-
-    codegraph context "<task description>" -p .   # focused file+symbol context
-    codegraph query "<ClassName or function>" -p . # where is X defined / used
-    codegraph affected <changed-files> -p .        # which tests are affected
-    codegraph sync .                               # after any code change
-
-Decision order for code tasks:
-  1. codegraph context       — which symbols matter?
-  2. understand-anything     — where in the architecture does this live?
-  3. Read raw source         — only the 1-2 files that actually matter.
-
-### graphify
-
-graphify-out/ not yet generated for this repo.
-
-<!-- graph-tools-end -->
